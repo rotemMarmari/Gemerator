@@ -1,11 +1,12 @@
 import spotipy
 from spotipy.oauth2 import SpotifyOAuth
 
+import os
 import time
 
-from flask import Flask, request, url_for, session, redirect, render_template
+from flask import Flask, request, url_for, session, redirect, render_template, send_from_directory, jsonify
+from flask_cors import CORS
 
-import os
 import numpy as np
 import pandas as pd
 
@@ -18,19 +19,21 @@ from sklearn.metrics import euclidean_distances
 from scipy.spatial.distance import cdist
 
 from spotipy.oauth2 import SpotifyClientCredentials
+from spotipy.cache_handler import CacheFileHandler
+
 from collections import defaultdict
-from spotipy.oauth2 import SpotifyOAuth
 
-import warnings
 
-app = Flask(__name__)
+app = Flask(__name__, static_folder='../frontend/my-app/build', static_url_path='/')
+CORS(app, supports_credentials=True, resources={r"/*": {"origins": "http://localhost:3000"}})
+
 app.config['SESSION_COOKIE_ NAME'] = 'spotify cookie'
 app.secret_key = 'dbs*eit4^3785h!g8i9@0puew?r5'
 
 TOKEN_INFO = 'token_info'
 CLIENT_ID ='11b6d46776d545af9be0a471e6ba9e56'
 CLIENT_SECRET = '128ce551f20e4d6e88e6f83f8766655a'
-REDIRECT_URI = 'http://localhost:5000'
+REDIRECT_URI = 'http://localhost:5000/redirect'
 
 #####################################################
 data = pd.read_csv("Data/modified_tracks_features.csv")
@@ -160,18 +163,21 @@ def recommend_songs(song_list, spotify_data, n_songs=10):
     metadata_cols = ['name', 'year', 'artists', 'id']
     return rec_songs[metadata_cols].to_dict(orient='records')
 #####################################################
+
 @app.route('/')
 def home_page():
-    return render_template('home.html')
+    return jsonify({"message": "Welcome to the Spotify recommendation system!"})
+    #return send_from_directory(app.static_folder,'home.html')
 
 @app.route('/login')
 def login():
     auth_url = create_spotify_oauth().get_authorize_url()
-    return redirect(auth_url)
+    return jsonify({"auth_url": auth_url})
+    #return redirect(auth_url)
 
 @app.route('/create_playlist')
 def create_playlist():
-    return render_template('create_playlist_manually.html')
+    return jsonify({"message": "Create a playlist manually"})
 
 @app.route('/redirect')
 def redirect_page():
@@ -193,8 +199,9 @@ def redirect_page():
         'id': 'saved_tracks'
     }
     user_playlists.append(saved_tracks_playlist)
-    return render_template('profile.html', user_info=user_info, user_playlists=user_playlists)
-
+    return jsonify({'user_info': user_info, 'user_playlists': user_playlists})
+    #return render_template('profile.html', user_info=user_info, user_playlists=user_playlists)
+    #return jsonify(userInfo=user_info, userPlaylists=user_playlists)
 
 @app.route('/savePlaylist/<playlist_id>')
 def save_playlist(playlist_id):
@@ -245,12 +252,20 @@ def save_playlist(playlist_id):
         # ]
 
     playlist = recommend_songs(playlist_tracks_data, data, n_songs=20)
-    return playlist
+    #return playlist
+    return jsonify(playlist)
 
-@app.route('/logout')
+@app.route('/logout', methods=['POST'])
 def logout():
     session.clear()
-    return redirect(url_for('home_page'))
+    spotify_oauth = create_spotify_oauth()
+    cache_handler = spotify_oauth.cache_handler
+    if cache_handler:
+        cache_path = cache_handler.cache_path
+        if os.path.exists(cache_path):
+            os.remove(cache_path)
+            return jsonify({"message": "Logged out successfully and cache cleared"})
+    return jsonify({"message": "Logged out successfully but no cache file found"})
 
 
 def get_token():
@@ -270,6 +285,7 @@ def get_token():
 def create_spotify_oauth():
     return SpotifyOAuth(client_id = CLIENT_ID, client_secret = CLIENT_SECRET,
                          redirect_uri= url_for('redirect_page', _external = True) ,
-                         scope='user-library-read playlist-modify-public playlist-modify-private')
+                         scope='user-library-read playlist-modify-public playlist-modify-private',
+                           cache_handler=CacheFileHandler(cache_path=".cache"))
 
 app.run(debug=True)
