@@ -1,5 +1,7 @@
 import spotipy
 from spotipy.oauth2 import SpotifyOAuth
+from spotipy.oauth2 import SpotifyClientCredentials
+from spotipy.cache_handler import CacheFileHandler
 
 import os
 import time
@@ -13,13 +15,8 @@ import pandas as pd
 from sklearn.cluster import KMeans
 from sklearn.preprocessing import StandardScaler
 from sklearn.pipeline import Pipeline
-from sklearn.manifold import TSNE
-from sklearn.decomposition import PCA
 from sklearn.metrics import euclidean_distances
-from scipy.spatial.distance import cdist
-
-from spotipy.oauth2 import SpotifyClientCredentials
-from spotipy.cache_handler import CacheFileHandler
+from sklearn.metrics.pairwise import cosine_similarity
 
 from collections import defaultdict
 
@@ -33,20 +30,29 @@ app.secret_key = 'dbs*eit4^3785h!g8i9@0puew?r5'
 TOKEN_INFO = 'token_info'
 CLIENT_ID ='11b6d46776d545af9be0a471e6ba9e56'
 CLIENT_SECRET = '128ce551f20e4d6e88e6f83f8766655a'
-REDIRECT_URI = 'http://localhost:5000/redirect'
+REDIRECT_URI = 'http://localhost:5000'
 
 #####################################################
 data = pd.read_csv("Data/modified_tracks_features.csv")
+col_to_drop = ['key', 'explicit']
+data.drop(col_to_drop, axis=1, inplace=True)
+ 
+data = data[data['popularity'] != 0]
+
+number_cols = ['valence', 'year', 'acousticness', 'danceability', 'duration_ms', 'energy',
+'instrumentalness', 'liveness', 'loudness', 'mode', 'speechiness', 'tempo', 'popularity']
+
 clustered_data = data.copy()
 song_cluster_pipeline = Pipeline([('scaler', StandardScaler()), 
                                   ('kmeans', KMeans(n_clusters=20, 
                                    verbose=False))
                                  ], verbose=False)
-
-X = clustered_data.select_dtypes(np.number)
+ 
+X = clustered_data[number_cols]
 song_cluster_pipeline.fit(X)
 song_cluster_labels = song_cluster_pipeline.predict(X)
 clustered_data['cluster_label'] = song_cluster_labels
+
 
 sp = spotipy.Spotify(auth_manager=SpotifyClientCredentials(client_id="e3c96827d559450cbdda613008fe0c10", client_secret="f5177b8d8f3444898cde77354c03991c"))
 pd.set_option('display.max_colwidth', None)
@@ -78,11 +84,6 @@ from collections import defaultdict
 from sklearn.metrics import euclidean_distances
 from scipy.spatial.distance import cdist
 import difflib
-
-# number_cols = ['valence', 'year', 'acousticness', 'danceability', 'duration_ms', 'energy', 'explicit',
-#  'instrumentalness', 'key', 'liveness', 'loudness', 'mode', 'popularity', 'speechiness', 'tempo']
-number_cols = ['valence', 'year', 'acousticness', 'danceability', 'duration_ms', 'energy', 'explicit',
- 'instrumentalness', 'key', 'liveness', 'loudness', 'mode', 'speechiness', 'tempo']
 
 def get_song_data(song, spotify_data):
     # try to find the song in the dataset
@@ -123,42 +124,25 @@ def flatten_dict_list(dict_list):
             flattened_dict[key].append(value)
             
     return flattened_dict
-def get_preview_urls(playlist):
-    for song_info in playlist:
-        artists = eval(song_info['artists']) 
-        artist_string = ", ".join(artists)
-        track_info = sp.track(song_info['id'])
-
-        if track_info['preview_url']:
-            song_info['preview_url'] = track_info['preview_url']
-        else:
-            result_df = find_song(song_info['name'], artist_string, song_info['year'])
-            song_info['preview_url'] = result_df['preview_url'].to_string(index=False)
 
 from sklearn.metrics.pairwise import cosine_similarity
 
-def recommend_songs(song_list, spotify_data, n_songs=10):
+def recommend_songs(song_list, spotify_data, song_cluster_pipeline, n_songs=10):
     # Flatten the input song list
     song_dict = flatten_dict_list(song_list)
-    
     # Get mean vector of input songs
     song_center = get_mean_vector(song_list, spotify_data)
-    
     # Scale the Spotify data
     scaler = song_cluster_pipeline.steps[0][1]
     scaled_data = scaler.transform(spotify_data[number_cols])
     scaled_song_center = scaler.transform(song_center.reshape(1, -1))
-    
     # Compute cosine similarity between the input songs and Spotify data
     similarities = cosine_similarity(scaled_song_center, scaled_data)
-    
     # Get indices of top N similar songs
     index = np.argsort(similarities[0])[-n_songs:][::-1]
-    
     # Filter out songs already in input list
     rec_songs = spotify_data.iloc[index]
     rec_songs = rec_songs[~rec_songs['name'].isin(song_dict['name'])]
-    
     # Return recommended songs
     metadata_cols = ['name', 'year', 'artists', 'id']
     return rec_songs[metadata_cols].to_dict(orient='records')
@@ -189,7 +173,7 @@ def redirect_page():
     sp = spotipy.Spotify(auth=token_info['access_token'])
     user_info = {
         'name': sp.current_user()['display_name'],
-        'image': sp.current_user()['images'][0]['url']
+        'image': sp.current_user()['images'][1]['url']
     }
     user_playlists = sp.current_user_playlists()['items']
     # Fetch user's saved tracks
@@ -212,7 +196,7 @@ def save_playlist(playlist_id):
         return redirect('/')
     
     sp = spotipy.Spotify(auth=token_info['access_token'])
-
+    playlist_tracks_data = []
     if playlist_id == 'saved_tracks':
         # Handle the case for 'Liked Songs' playlist
         saved_tracks = []
@@ -221,8 +205,8 @@ def save_playlist(playlist_id):
         while results['next']:
             results = sp.next(results)
             saved_tracks.extend(results['items'])
-        playlist_tracks_data = []
-        for item in playlist_tracks:
+
+        for item in saved_tracks:
             track = item['track']
             song = {
                 'name': track['name'],
@@ -233,7 +217,7 @@ def save_playlist(playlist_id):
     else:
         # Handle the case for other playlists
         playlist_tracks = sp.playlist_tracks(playlist_id)['items']
-        playlist_tracks_data = []
+
         for item in playlist_tracks:
             track = item['track']
             song = {
@@ -251,9 +235,23 @@ def save_playlist(playlist_id):
         #     for track in playlist_tracks
         # ]
 
-    playlist = recommend_songs(playlist_tracks_data, data, n_songs=20)
+    playlist = recommend_songs(playlist_tracks_data, data,song_cluster_pipeline, n_songs=20)
+    get_preview_urls(playlist)
     #return playlist
     return jsonify(playlist)
+
+def get_preview_urls(playlist):
+    uri_list = [song_info['id'] for song_info in playlist]
+    track_infos = sp.tracks(uri_list)['tracks']
+    for i, song_info in enumerate(playlist):
+        track_info = track_infos[i]
+        if track_info['preview_url']:
+            song_info['preview_url'] = track_info['preview_url']
+        else:
+            artists = eval(song_info['artists'])
+            artist_string = ", ".join(artists)
+            result_df = find_song(song_info['name'], artist_string, song_info['year'])
+            song_info['preview_url'] = result_df['preview_url'].to_string(index=False)
 
 @app.route('/logout', methods=['POST'])
 def logout():
@@ -285,7 +283,7 @@ def get_token():
 def create_spotify_oauth():
     return SpotifyOAuth(client_id = CLIENT_ID, client_secret = CLIENT_SECRET,
                          redirect_uri= url_for('redirect_page', _external = True) ,
-                         scope='user-library-read playlist-modify-public playlist-modify-private',
-                           cache_handler=CacheFileHandler(cache_path=".cache"))
+                         scope='user-library-read playlist-modify-public playlist-modify-private')
+                           #cache_handler=CacheFileHandler(cache_path=".cache"))
 
 app.run(debug=True)

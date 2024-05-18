@@ -1,5 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { login, getProfile, savePlaylist, logout } from './api';
+import './App.css';
+import Home from './Home';
+import Profile from './Profile';
+import Header from './components/Header';
 
 const App = () => {
   const [userInfo, setUserInfo] = useState(null);
@@ -24,18 +28,23 @@ const App = () => {
   };
 
   return (
-    <div>
-      {!userInfo ? (
-        <button onClick={() => login().then(response => {
-          window.location.href = response.data.auth_url;
-        })}>
-          Login with Spotify
-        </button>
-      ) : (
-        <div>
+    <div className="app-container">
+      <Header />
+      {!userInfo ? 
+      < Home/> :
+      // (
+      //   <button onClick={() => login().then(response => {
+      //     window.location.href = response.data.auth_url;
+      //   })}>
+      //     Login with Spotify
+      //   </button>
+      // ) : 
+      (
+       // <Profile/>
+        <div className='container'>
           <h1>Welcome, {userInfo.name}</h1>
-          <img src={userInfo.image} alt="User" />
-          <button onClick={logout}>Logout</button>
+          <img src={userInfo.image} alt="User" className="profile-image"/>
+          <button onClick={logout} className="logout-button">Logout</button>
           <h2>Your Playlists</h2>
           <ul>
             {playlists.map(playlist => (
@@ -51,7 +60,7 @@ const App = () => {
               <ul>
                 {recommendedPlaylist.map(song => (
                   <li key={song.id}>
-                    {song.name} by {song.artists} ({song.year})
+                    {song.name} by {song.artists} ({song.year}), {song.preview_url}
                   </li>
                 ))}
               </ul>
