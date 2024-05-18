@@ -25,7 +25,6 @@ const Profile = ({ userInfo, userPlaylists, onLogout }) => {
   return (
     <div className="container">
       <h1>Welcome, {userInfo.name}!</h1>
-      <img src={userInfo.image} alt={`${userInfo.name}'s profile picture`} className="profile-image"/>
       <h2>Your Playlists:</h2>
       <ul>
         {userPlaylists.map((playlist) => (

@@ -1,23 +1,41 @@
+*{
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
 .App {
   text-align: center;
 }
 
-.App-logo {
-  height: 40vmin;
-  pointer-events: none;
+.head-logo{
+  height: 3rem;
+  width: 3rem;
 }
 
-.logo {
-  display: inline-block;
-  vertical-align: middle;
+.left-header{
+  display: flex;
+  gap: 0.3rem;
 }
 
-.logo img {
-  height: 50px; /* Adjust the height as needed */
+.right-header{
+  display: flex;
+  gap: 0.3rem;
+}
+
+.user-header{
+  display: flex;
+  gap: 0.4rem;
+  background-color: #dceae6;
+  padding: 0.4rem;
+  border-radius: 10px;
+}
+.user-header h2{
+  color: #4D869C
 }
 
 .app-container {
-  background-color: #FFEBB2;
+  background-color: #EEF7FF;
   min-height: 100vh; /* Ensure the container takes up the full viewport height */
   display: flex;
   flex-direction: column; /* Stack the header and content vertically */
@@ -33,14 +51,15 @@
   margin: 0 auto; /* Center the image horizontally */
 }
 
-.header {
+header {
+  padding: 0 1.7rem;
   display: flex;
+  height: 5rem;
+  background-color: #CDE8E5;
+  box-shadow: 0 4px 6px rgba(186, 167, 167, 0.25);
   justify-content: space-between;
   align-items: center;
-  background-color: #8644A2;
   color: white;
-  padding: 10px 20px;
-  margin-top: 0;
 }
 
 .header-title {

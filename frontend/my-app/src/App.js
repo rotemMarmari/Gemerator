@@ -29,7 +29,7 @@ const App = () => {
 
   return (
     <div className="app-container">
-      <Header />
+      <Header userInfo={userInfo} />
       {!userInfo ? 
       < Home/> :
       // (
@@ -43,7 +43,6 @@ const App = () => {
        // <Profile/>
         <div className='container'>
           <h1>Welcome, {userInfo.name}</h1>
-          <img src={userInfo.image} alt="User" className="profile-image"/>
           <button onClick={logout} className="logout-button">Logout</button>
           <h2>Your Playlists</h2>
           <ul>
@@ -60,7 +59,15 @@ const App = () => {
               <ul>
                 {recommendedPlaylist.map(song => (
                   <li key={song.id}>
-                    {song.name} by {song.artists} ({song.year}), {song.preview_url}
+                    {song.name} by {song.artists} ({song.year})
+                    {song.preview_url ? (
+                      <audio controls>
+                        <source src={song.preview_url} type="audio/mpeg" />
+                        Your browser does not support the audio element.
+                      </audio>
+                    ) : (
+                      <p>No preview available</p>
+                    )}
                   </li>
                 ))}
               </ul>

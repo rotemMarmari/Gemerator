@@ -226,14 +226,6 @@ def save_playlist(playlist_id):
                 'year': int(track['album']['release_date'][:4])
             }
             playlist_tracks_data.append(song)
-        # playlist_tracks_data = [
-        #     {
-        #         'name': track['track']['name'],
-        #         'artists': [artist['name'] for artist in track['track']['artists']],
-        #         'year': track['track']['album']['release_date'][:4]
-        #     }
-        #     for track in playlist_tracks
-        # ]
 
     playlist = recommend_songs(playlist_tracks_data, data,song_cluster_pipeline, n_songs=20)
     get_preview_urls(playlist)
