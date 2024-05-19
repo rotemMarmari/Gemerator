@@ -156,14 +156,11 @@ def home_page():
 @app.route('/login')
 def login():
     auth_url = create_spotify_oauth().get_authorize_url()
+    print(auth_url)
     return jsonify({"auth_url": auth_url})
     #return redirect(auth_url)
 
-@app.route('/create_playlist')
-def create_playlist():
-    return jsonify({"message": "Create a playlist manually"})
-
-@app.route('/redirect')
+@app.route('/profile')
 def redirect_page():
     session.clear()
     code = request.args.get('code')
@@ -229,6 +226,7 @@ def save_playlist(playlist_id):
 
     playlist = recommend_songs(playlist_tracks_data, data,song_cluster_pipeline, n_songs=20)
     get_preview_urls(playlist)
+    get_album_cover_urls(playlist)
     #return playlist
     return jsonify(playlist)
 
@@ -244,6 +242,22 @@ def get_preview_urls(playlist):
             artist_string = ", ".join(artists)
             result_df = find_song(song_info['name'], artist_string, song_info['year'])
             song_info['preview_url'] = result_df['preview_url'].to_string(index=False)
+
+def get_album_cover_urls(playlist):
+    uri_list = [song_info['id'] for song_info in playlist]
+    track_infos = sp.tracks(uri_list)['tracks']
+    for i, song_info in enumerate(playlist):
+        track_info = track_infos[i]
+        if track_info['album']['images'][0]['url']:
+            song_info['album_cover_url'] = track_info['album']['images'][0]['url']
+
+
+@app.route('/add_song_to_playlist/<playlist_id>/<track_id>', methods=['POST'])
+def add_song_to_playlist(playlist_id, track_id):
+    print(playlist_id, track_id)
+    sp.playlist_add_items(playlist_id, [track_id])
+    return jsonify({"message": "Song added to playlist"})
+
 
 @app.route('/logout', methods=['POST'])
 def logout():
@@ -278,4 +292,4 @@ def create_spotify_oauth():
                          scope='user-library-read playlist-modify-public playlist-modify-private')
                            #cache_handler=CacheFileHandler(cache_path=".cache"))
 
-app.run(debug=True)
+app.run(debug=True, port=5000)

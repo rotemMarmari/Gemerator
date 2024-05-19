@@ -1,25 +1,31 @@
 import React, { useState, useEffect } from 'react';
-import { login, getProfile, savePlaylist, logout } from './api';
+import { getProfile, savePlaylist, logout, login } from './api';
 import './App.css';
 import Home from './Home';
-import Profile from './Profile';
 import Header from './components/Header';
+import SongCard from './components/SongCard';
+import VirtualizedPlaylists from './VirtualizedPlaylists'; // Adjust the import based on your file structure
 
 const App = () => {
   const [userInfo, setUserInfo] = useState(null);
   const [playlists, setPlaylists] = useState([]);
   const [recommendedPlaylist, setRecommendedPlaylist] = useState([]);
+  const [playlistId, setPlaylistId] = useState(null);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
 
   useEffect(() => {
-    getProfile().then(response => {
-      setUserInfo(response.data.user_info);
-      setPlaylists(response.data.user_playlists);
-    }).catch(error => {
-      console.error('Error fetching profile:', error);
-    });
-  }, []);
+    if (isAuthenticated) {
+      getProfile().then(response => {
+        setUserInfo(response.data.user_info);
+        setPlaylists(response.data.user_playlists);
+      }).catch(error => {
+        console.error('Error fetching profile:', error);
+      });
+    }
+  }, [isAuthenticated]);
 
   const handleSavePlaylist = (playlistId) => {
+    setPlaylistId(playlistId);
     savePlaylist(playlistId).then(response => {
       setRecommendedPlaylist(response.data);
     }).catch(error => {
@@ -27,50 +33,38 @@ const App = () => {
     });
   };
 
+  const handleLogin = () => {
+    login().then(() => setIsAuthenticated(true));
+  };
+
+  const handleLogout = () => {
+    logout().then(() => {
+      setIsAuthenticated(false);
+      setUserInfo(null);
+      setPlaylists([]);
+      setRecommendedPlaylist([]);
+    });
+  };
+
   return (
     <div className="app-container">
       <Header userInfo={userInfo} />
-      {!userInfo ? 
-      < Home/> :
-      // (
-      //   <button onClick={() => login().then(response => {
-      //     window.location.href = response.data.auth_url;
-      //   })}>
-      //     Login with Spotify
-      //   </button>
-      // ) : 
-      (
-       // <Profile/>
+      {!isAuthenticated ? (
+        <Home onLogin={handleLogin} />
+      ) : (
         <div className='container'>
-          <h1>Welcome, {userInfo.name}</h1>
-          <button onClick={logout} className="logout-button">Logout</button>
+          <h1>Welcome, {userInfo?.name}</h1>
+          <button onClick={handleLogout} className="logout-button">Logout</button>
           <h2>Your Playlists</h2>
-          <ul>
-            {playlists.map(playlist => (
-              <li key={playlist.id}>
-                {playlist.name}
-                <button onClick={() => handleSavePlaylist(playlist.id)}>Get Recommendations</button>
-              </li>
-            ))}
-          </ul>
+          <VirtualizedPlaylists handleSavePlaylist={handleSavePlaylist} />
           {recommendedPlaylist.length > 0 && (
             <div>
               <h2>Recommended Songs</h2>
-              <ul>
+              <div>
                 {recommendedPlaylist.map(song => (
-                  <li key={song.id}>
-                    {song.name} by {song.artists} ({song.year})
-                    {song.preview_url ? (
-                      <audio controls>
-                        <source src={song.preview_url} type="audio/mpeg" />
-                        Your browser does not support the audio element.
-                      </audio>
-                    ) : (
-                      <p>No preview available</p>
-                    )}
-                  </li>
+                  <SongCard key={song.id} song={song} playlistId={playlistId} />
                 ))}
-              </ul>
+              </div>
             </div>
           )}
         </div>
