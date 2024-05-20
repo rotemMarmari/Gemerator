@@ -51,6 +51,14 @@
   margin: 0 auto; /* Center the image horizontally */
 }
 
+.spinner-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 10rem;
+}
+
+
 header {
   padding: 0 1.7rem;
   display: flex;
@@ -70,6 +78,17 @@ header {
 
 .logout-button {
   align-self: flex-end;
+  padding: 10px 20px;
+  background-color: #1db954;
+  color: white;
+  border: none;
+  border-radius: 20px;
+  cursor: pointer;
+  font-size: 16px;
+}
+
+.login-button {
+  align-self: center;
   padding: 10px 20px;
   background-color: #1db954;
   color: white;

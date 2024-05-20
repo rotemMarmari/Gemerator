@@ -254,9 +254,42 @@ def get_album_cover_urls(playlist):
 
 @app.route('/add_song_to_playlist/<playlist_id>/<track_id>', methods=['POST'])
 def add_song_to_playlist(playlist_id, track_id):
-    print(playlist_id, track_id)
-    sp.playlist_add_items(playlist_id, [track_id])
-    return jsonify({"message": "Song added to playlist"})
+    try:
+        # Check if the playlist_id is a special value indicating "Liked Songs"
+        if playlist_id == "saved_tracks":
+            sp.current_user_saved_tracks_add([track_id])
+            message = "Song added to Liked Songs"
+        else:
+            # Check if the playlist is a special Spotify-generated playlist
+            playlist = sp.playlist(playlist_id)
+            if playlist['owner']['id'] == 'spotify':
+                return jsonify({"error": "Cannot add tracks to Spotify-generated playlists"})
+            
+            # Regular playlist
+            sp.playlist_add_items(playlist_id, [track_id])
+            message = "Song added to playlist"
+
+        return jsonify({"message": message})
+    except spotipy.exceptions.SpotifyException as e:
+        return jsonify({"error": str(e)}), 400
+
+#     print(playlist_id, track_id)
+#     sp.playlist_add_items(playlist_id, [track_id])
+#     return jsonify({"message": "Song added to playlist"})
+
+# def add_to_playlist(playlist_id, track_id):
+#     try:
+#         sp.playlist_add_items(playlist_id, [track_id])
+#         return jsonify({"message": "Song added to playlist"})
+#     except spotipy.exceptions.SpotifyException as e:
+#         return jsonify({"error": str(e)}), 400
+    
+# def add_to_saved_tracks(track_id):
+#     try:
+#         sp.current_user_saved_tracks_add([track_id])
+#         return jsonify({"message": "Song added to Liked Songs"})
+#     except spotipy.exceptions.SpotifyException as e:
+#         return jsonify({"error": str(e)}), 400
 
 
 @app.route('/logout', methods=['POST'])

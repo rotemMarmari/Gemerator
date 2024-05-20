@@ -23,7 +23,8 @@ const Content = styled(CardContent)({
 });
 
 const Cover = styled(CardMedia)({
-  width: 151,
+  width: 100,
+  height: 100,
 });
 
 const Controls = styled('div')(({ theme }) => ({
@@ -35,15 +36,19 @@ const Controls = styled('div')(({ theme }) => ({
 
 
 const SongCard = ({ song, playlistId }) => {
+  const [isAdded, setIsAdded] = useState(false); // State to track if the song is added
 
   const handleAddClick = () => {
-    addPlaylist(playlistId, song.id);
-    console.log(`Added song: ${song.id}`);
+    if (!isAdded) { // Only allow adding if the song hasn't been added yet
+      addPlaylist(playlistId, song.id);
+      console.log(`Added song: ${song.id}`);
+      setIsAdded(true); // Mark the song as added
+    }
   };
 
   
   return (
-    <Root sx={{ width: 550, height: 200 }} >
+    <Root sx={{ width: 450, height: 200 }} >
       <Details>
         <Content>
           <Typography component="h5" variant="h5">
@@ -60,8 +65,6 @@ const SongCard = ({ song, playlistId }) => {
               Your browser does not support the audio element.
             </audio>
           )}
-          <IconButton aria-label="play/pause">
-          </IconButton>
           <IconButton aria-label="add" onClick={handleAddClick}>
             <AddIcon />
           </IconButton>

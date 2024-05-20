@@ -4,7 +4,11 @@ import './App.css';
 import Home from './Home';
 import Header from './components/Header';
 import SongCard from './components/SongCard';
-import VirtualizedPlaylists from './VirtualizedPlaylists'; // Adjust the import based on your file structure
+import VirtualizedPlaylists from './VirtualizedPlaylists'; 
+import FormGroup from '@mui/material/FormGroup';
+import FormControlLabel from '@mui/material/FormControlLabel';
+import Checkbox from '@mui/material/Checkbox';
+import { ClipLoader } from 'react-spinners'; // Import the spinner
 
 const App = () => {
   const [userInfo, setUserInfo] = useState(null);
@@ -12,6 +16,8 @@ const App = () => {
   const [recommendedPlaylist, setRecommendedPlaylist] = useState([]);
   const [playlistId, setPlaylistId] = useState(null);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [loading, setLoading] = useState(false); // State to manage loading spinner
+
 
   useEffect(() => {
     if (isAuthenticated) {
@@ -26,10 +32,13 @@ const App = () => {
 
   const handleSavePlaylist = (playlistId) => {
     setPlaylistId(playlistId);
+    setLoading(true); // Show the spinner
     savePlaylist(playlistId).then(response => {
       setRecommendedPlaylist(response.data);
+      setLoading(false); // Hide the spinner
     }).catch(error => {
       console.error('Error saving playlist:', error);
+      setLoading(false); // Hide the spinner in case of error
     });
   };
 
@@ -46,6 +55,8 @@ const App = () => {
     });
   };
 
+  const UseHistory = { inputProps: { 'aria-label': 'Checkbox demo' } };
+
   return (
     <div className="app-container">
       <Header userInfo={userInfo} />
@@ -56,16 +67,25 @@ const App = () => {
           <h1>Welcome, {userInfo?.name}</h1>
           <button onClick={handleLogout} className="logout-button">Logout</button>
           <h2>Your Playlists</h2>
+          <FormGroup>
+            <FormControlLabel control={<Checkbox defaultChecked />} label="Use listening history" />
+          </FormGroup>
           <VirtualizedPlaylists handleSavePlaylist={handleSavePlaylist} />
-          {recommendedPlaylist.length > 0 && (
-            <div>
-              <h2>Recommended Songs</h2>
-              <div>
-                {recommendedPlaylist.map(song => (
-                  <SongCard key={song.id} song={song} playlistId={playlistId} />
-                ))}
-              </div>
+          {loading ? (
+            <div className="spinner-container">
+              <ClipLoader size={50} color={"#123abc"} loading={loading} />
             </div>
+          ) : (
+            recommendedPlaylist.length > 0 && (
+              <div>
+                <h2>Recommended Songs</h2>
+                <div>
+                  {recommendedPlaylist.map(song => (
+                    <SongCard key={song.id} song={song} playlistId={playlistId} />
+                  ))}
+                </div>
+              </div>
+            )
           )}
         </div>
       )}
