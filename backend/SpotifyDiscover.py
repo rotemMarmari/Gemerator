@@ -28,8 +28,8 @@ app.config['SESSION_COOKIE_ NAME'] = 'spotify cookie'
 app.secret_key = 'dbs*eit4^3785h!g8i9@0puew?r5'
 
 TOKEN_INFO = 'token_info'
-CLIENT_ID ='11b6d46776d545af9be0a471e6ba9e56'
-CLIENT_SECRET = '128ce551f20e4d6e88e6f83f8766655a'
+CLIENT_ID ='33419e566fb444bebcc7ded9b2ec6289'
+CLIENT_SECRET = '871085c5d5ed438abc7ec5c6e73ff451'
 REDIRECT_URI = 'http://localhost:5000'
 
 #####################################################
@@ -54,7 +54,7 @@ song_cluster_labels = song_cluster_pipeline.predict(X)
 clustered_data['cluster_label'] = song_cluster_labels
 
 
-sp = spotipy.Spotify(auth_manager=SpotifyClientCredentials(client_id="e3c96827d559450cbdda613008fe0c10", client_secret="f5177b8d8f3444898cde77354c03991c"))
+sp = spotipy.Spotify(auth_manager=SpotifyClientCredentials(client_id=CLIENT_ID, client_secret=CLIENT_SECRET))
 pd.set_option('display.max_colwidth', None)
 
 def find_song(name, artist, year):
@@ -251,7 +251,6 @@ def get_album_cover_urls(playlist):
         if track_info['album']['images'][0]['url']:
             song_info['album_cover_url'] = track_info['album']['images'][0]['url']
 
-
 @app.route('/add_song_to_playlist/<playlist_id>/<track_id>', methods=['POST'])
 def add_song_to_playlist(playlist_id, track_id):
     try:
@@ -291,6 +290,47 @@ def add_song_to_playlist(playlist_id, track_id):
 #     except spotipy.exceptions.SpotifyException as e:
 #         return jsonify({"error": str(e)}), 400
 
+selected_songs = []
+
+@app.route('/search', methods=['GET'])
+def search_songs():
+    query = request.args.get('q')
+    if not query:
+        return jsonify([])
+
+    results = sp.search(q=query, limit=10, type='track')
+    songs = []
+    for item in results['tracks']['items']:
+        song = {
+            'name': item['name'],
+            'artists': ', '.join([artist['name'] for artist in item['artists']]),
+            'id': item['id']
+        }
+        songs.append(song)
+    return jsonify(songs)
+
+
+@app.route('/songs', methods=['POST'])
+def add_song():
+    song = request.json
+    selected_songs.append(song)
+    print(selected_songs)
+    return jsonify({'status': 'success'})
+
+@app.route('/songs', methods=['GET'])
+def get_songs():
+    return jsonify(selected_songs)
+
+@app.route('/songs/<song_id>', methods=['DELETE'])
+def remove_song(song_id):
+    global selected_songs
+    selected_songs = [song for song in selected_songs if song['id'] != song_id]
+    print(selected_songs)
+    return jsonify({'status': 'success'})
+
+
+if __name__ == '__main__':
+    app.run(debug=True, port=5000)
 
 @app.route('/logout', methods=['POST'])
 def logout():
@@ -303,7 +343,6 @@ def logout():
             os.remove(cache_path)
             return jsonify({"message": "Logged out successfully and cache cleared"})
     return jsonify({"message": "Logged out successfully but no cache file found"})
-
 
 def get_token():
     token_info = session.get(TOKEN_INFO, None)
