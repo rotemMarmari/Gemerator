@@ -7,10 +7,12 @@ import IconButton from '@mui/material/IconButton';
 import Typography from '@mui/material/Typography';
 import AddIcon from '@mui/icons-material/Add';
 import { addPlaylist } from '../api';
+import '../App.css';
 
 const Root = styled(Card)(({ theme }) => ({
   display: 'flex',
   marginBottom: theme.spacing(2),
+  
 }));
 
 const Details = styled('div')({
@@ -19,7 +21,7 @@ const Details = styled('div')({
 });
 
 const Content = styled(CardContent)({
-  flex: '1 0 auto',
+  flex: '0.5 0 auto',
 });
 
 const Cover = styled(CardMedia)({
@@ -36,25 +38,24 @@ const Controls = styled('div')(({ theme }) => ({
 
 
 const SongCard = ({ song, playlistId }) => {
-  const [isAdded, setIsAdded] = useState(false); // State to track if the song is added
+  const [isAdded, setIsAdded] = useState(false); 
 
   const handleAddClick = () => {
-    if (!isAdded) { // Only allow adding if the song hasn't been added yet
+    if (!isAdded) { 
       addPlaylist(playlistId, song.id);
-      console.log(`Added song: ${song.id}`);
-      setIsAdded(true); // Mark the song as added
+      setIsAdded(true); 
     }
   };
 
   
   return (
-    <Root sx={{ width: 450, height: 200 }} >
+    <Root sx={{ width: 300, height: 200 }} >
       <Details>
         <Content>
-          <Typography component="h5" variant="h5">
+          <Typography component="h5" variant="h5" sx={{ fontSize: '1.2rem'}}>
             {song.name}
           </Typography>
-          <Typography variant="subtitle1" color="textSecondary">
+          <Typography variant="subtitle1" color="textSecondary" sx={{ fontSize: '0.875rem' }}>
             {song.artists} ({song.year})
           </Typography>
         </Content>

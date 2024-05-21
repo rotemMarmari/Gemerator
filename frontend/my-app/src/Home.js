@@ -1,6 +1,8 @@
 import React from 'react';
+import SearchBar from './SearchBar';
+import './home.css';
 
-const Home = ({ onLogin }) => {
+const Home = ({ onLogin ,onSongSelect}) => {
   return (
     <div className="app-container">
       <h1>Welcome to Gemerator!</h1>
@@ -9,6 +11,9 @@ const Home = ({ onLogin }) => {
         <button onClick={onLogin} className="login-button"> 
           Login with Spotify
         </button>
+      </div>
+      <div className="search-bar">
+        <SearchBar onSongSelect={onSongSelect} />
       </div>
     </div>
   );

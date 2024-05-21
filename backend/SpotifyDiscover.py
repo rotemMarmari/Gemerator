@@ -224,9 +224,11 @@ def save_playlist(playlist_id):
             }
             playlist_tracks_data.append(song)
 
-    playlist = recommend_songs(playlist_tracks_data, data,song_cluster_pipeline, n_songs=20)
+    playlist = recommend_songs(playlist_tracks_data, data,song_cluster_pipeline, n_songs=21)
     get_preview_urls(playlist)
     get_album_cover_urls(playlist)
+    for index, song in enumerate(playlist, start=1):
+        print(index, song['name'])
     #return playlist
     return jsonify(playlist)
 
@@ -273,24 +275,6 @@ def add_song_to_playlist(playlist_id, track_id):
     except spotipy.exceptions.SpotifyException as e:
         return jsonify({"error": str(e)}), 400
 
-#     print(playlist_id, track_id)
-#     sp.playlist_add_items(playlist_id, [track_id])
-#     return jsonify({"message": "Song added to playlist"})
-
-# def add_to_playlist(playlist_id, track_id):
-#     try:
-#         sp.playlist_add_items(playlist_id, [track_id])
-#         return jsonify({"message": "Song added to playlist"})
-#     except spotipy.exceptions.SpotifyException as e:
-#         return jsonify({"error": str(e)}), 400
-    
-# def add_to_saved_tracks(track_id):
-#     try:
-#         sp.current_user_saved_tracks_add([track_id])
-#         return jsonify({"message": "Song added to Liked Songs"})
-#     except spotipy.exceptions.SpotifyException as e:
-#         return jsonify({"error": str(e)}), 400
-
 
 @app.route('/logout', methods=['POST'])
 def logout():
@@ -324,5 +308,43 @@ def create_spotify_oauth():
                          redirect_uri= url_for('redirect_page', _external = True) ,
                          scope='user-library-read playlist-modify-public playlist-modify-private')
                            #cache_handler=CacheFileHandler(cache_path=".cache"))
+selected_songs = []
+
+@app.route('/search', methods=['GET'])
+def search_songs():
+    query = request.args.get('q')
+    if not query:
+        return jsonify([])
+
+    results = sp.search(q=query, limit=10, type='track')
+    songs = []
+    for item in results['tracks']['items']:
+        song = {
+            'name': item['name'],
+            'artists': ', '.join([artist['name'] for artist in item['artists']]),
+            'id': item['id']
+        }
+        songs.append(song)
+    return jsonify(songs)
+
+
+@app.route('/songs', methods=['POST'])
+def add_song():
+    song = request.json
+    selected_songs.append(song)
+    print(selected_songs)
+    return jsonify({'status': 'success'})
+
+@app.route('/songs', methods=['GET'])
+def get_songs():
+    return jsonify(selected_songs)
+
+@app.route('/songs/<song_id>', methods=['DELETE'])
+def remove_song(song_id):
+    global selected_songs
+    selected_songs = [song for song in selected_songs if song['id'] != song_id]
+    print(selected_songs)
+    return jsonify({'status': 'success'})
+
 
 app.run(debug=True, port=5000)

@@ -2,6 +2,9 @@
   margin: 0;
   padding: 0;
   box-sizing: border-box;
+  font-family: 'CircularSp', 'CircularSp-Arab', 'CircularSp-Hebr', 'CircularSp-Cyrl', 'CircularSp-Grek', 'CircularSp-Deva', sans-serif;
+  font-weight: 700;
+  font-style: normal;
 }
 
 .App {
@@ -31,7 +34,9 @@
   border-radius: 10px;
 }
 .user-header h2{
-  color: #4D869C
+  color: #4D869C;
+  font-size: 1.3rem;
+  align-content: center;
 }
 
 .app-container {
@@ -57,7 +62,6 @@
   align-items: center;
   height: 10rem;
 }
-
 
 header {
   padding: 0 1.7rem;
@@ -143,6 +147,17 @@ header {
   background-color: #57A6A1;
   font-size: 60px;
   
+}
+
+.song-cards-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem; /* Adjust the gap between cards as needed */
+}
+
+.song-cards-container > * {
+  flex: 1 1 50rem; /* Adjust the base width of the cards */
+  max-width: 30rem; /* Ensure the cards don't exceed their intended width */
 }
 
 .App-header {
