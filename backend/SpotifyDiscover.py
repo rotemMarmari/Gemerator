@@ -28,8 +28,8 @@ app.config['SESSION_COOKIE_ NAME'] = 'spotify cookie'
 app.secret_key = 'dbs*eit4^3785h!g8i9@0puew?r5'
 
 TOKEN_INFO = 'token_info'
-CLIENT_ID ='11b6d46776d545af9be0a471e6ba9e56'
-CLIENT_SECRET = '128ce551f20e4d6e88e6f83f8766655a'
+CLIENT_ID ='33419e566fb444bebcc7ded9b2ec6289'
+CLIENT_SECRET = '871085c5d5ed438abc7ec5c6e73ff451'
 REDIRECT_URI = 'http://localhost:5000'
 
 #####################################################
