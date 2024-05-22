@@ -63,13 +63,33 @@ const App = () => {
     console.log('Selected song:', song);
   };
 
+  const handleRecommend = (recommendedSongs) => {
+    setLoading(true); // Show the spinner
+    setRecommendedPlaylist(recommendedSongs);
+    setLoading(false); 
+  };
+
   const UseHistory = { inputProps: { 'aria-label': 'Checkbox demo' } };
 
   return (
     <div className="app-container">
       <Header userInfo={userInfo} />
       {!isAuthenticated ? (
-        <Home onLogin={handleLogin} onSongSelect={handleSongSelect}/>
+        <div>
+          <Home onLogin={handleLogin} onSongSelect={handleRecommend}/>
+          {loading ? (
+            <div className="spinner-container">
+              <ClipLoader size={50} color={"#123abc"} loading={loading} />
+            </div>
+          ) : (
+          <div className="song-cards-container">
+            {recommendedPlaylist.map(song => (
+              <SongCard key={song.id} song={song} playlistId={playlistId} />
+            ))}
+          </div>
+          ) }
+      </div>
+
       ) : (
         <div className='container'>
           <h1>Welcome, {userInfo?.name}</h1>

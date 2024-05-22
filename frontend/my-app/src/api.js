@@ -10,3 +10,4 @@ export const getProfile = () => api.get('/profile');
 export const savePlaylist = (playlistId) => api.get(`/savePlaylist/${playlistId}`);
 export const logout = () => api.post('/logout');
 export const addPlaylist = (playlistId, trackId) => api.post(`/add_song_to_playlist/${playlistId}/${trackId}`);
+

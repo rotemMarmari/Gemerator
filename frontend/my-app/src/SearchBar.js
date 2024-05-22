@@ -46,6 +46,15 @@ const SearchBar = ({ onSongSelect }) => {
     }
   };
 
+  const handleRecommend = async () => {
+    try {
+      const response = await axios.post('http://localhost:5000/recommend');
+      onSongSelect(response.data);
+    } catch (error) {
+      console.error('Error recommending songs:', error);
+    }
+  };
+
   return (
     <div className="main-container">
       <div className="search-bar-container">
@@ -64,7 +73,7 @@ const SearchBar = ({ onSongSelect }) => {
                 className="suggestion-item" 
                 onClick={() => handleSongSelect(suggestion)}
               >
-                {suggestion.name} - {suggestion.artist}
+                {suggestion.name} - {suggestion.artists}
               </div>
             ))}
           </div>
@@ -73,6 +82,7 @@ const SearchBar = ({ onSongSelect }) => {
       <SelectedSongs 
         selectedSongs={selectedSongs}
         onSongRemove={handleSongRemove}
+        onRecommend={handleRecommend}
       />
     </div>
   );

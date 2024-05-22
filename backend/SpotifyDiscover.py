@@ -28,8 +28,8 @@ app.config['SESSION_COOKIE_ NAME'] = 'spotify cookie'
 app.secret_key = 'dbs*eit4^3785h!g8i9@0puew?r5'
 
 TOKEN_INFO = 'token_info'
-CLIENT_ID ='11b6d46776d545af9be0a471e6ba9e56'
-CLIENT_SECRET = '128ce551f20e4d6e88e6f83f8766655a'
+CLIENT_ID ='33419e566fb444bebcc7ded9b2ec6289'
+CLIENT_SECRET = '871085c5d5ed438abc7ec5c6e73ff451'
 REDIRECT_URI = 'http://localhost:5000'
 
 #####################################################
@@ -54,7 +54,7 @@ song_cluster_labels = song_cluster_pipeline.predict(X)
 clustered_data['cluster_label'] = song_cluster_labels
 
 
-sp = spotipy.Spotify(auth_manager=SpotifyClientCredentials(client_id="e3c96827d559450cbdda613008fe0c10", client_secret="f5177b8d8f3444898cde77354c03991c"))
+sp = spotipy.Spotify(auth_manager=SpotifyClientCredentials(client_id=CLIENT_ID, client_secret=CLIENT_SECRET))
 pd.set_option('display.max_colwidth', None)
 
 def find_song(name, artist, year):
@@ -253,7 +253,6 @@ def get_album_cover_urls(playlist):
         if track_info['album']['images'][0]['url']:
             song_info['album_cover_url'] = track_info['album']['images'][0]['url']
 
-
 @app.route('/add_song_to_playlist/<playlist_id>/<track_id>', methods=['POST'])
 def add_song_to_playlist(playlist_id, track_id):
     try:
@@ -308,6 +307,9 @@ def create_spotify_oauth():
                          redirect_uri= url_for('redirect_page', _external = True) ,
                          scope='user-library-read playlist-modify-public playlist-modify-private')
                            #cache_handler=CacheFileHandler(cache_path=".cache"))
+
+##############################################################3
+
 selected_songs = []
 
 @app.route('/search', methods=['GET'])
@@ -322,7 +324,8 @@ def search_songs():
         song = {
             'name': item['name'],
             'artists': ', '.join([artist['name'] for artist in item['artists']]),
-            'id': item['id']
+            'id': item['id'],
+            'year': int(item['album']['release_date'][:4])
         }
         songs.append(song)
     return jsonify(songs)
@@ -346,5 +349,19 @@ def remove_song(song_id):
     print(selected_songs)
     return jsonify({'status': 'success'})
 
+@app.route('/recommend', methods=['POST'])
+def recommend():
+    global selected_songs
+    if not selected_songs:
+        return jsonify({"error": "No songs selected"}), 400
+
+    playlist = recommend_songs(selected_songs, data, song_cluster_pipeline, n_songs=21)
+    get_preview_urls(playlist)
+    get_album_cover_urls(playlist)
+    
+    for index, song in enumerate(playlist, start=1):
+        print(index, song['name'], "by", song["artists"])
+        
+    return jsonify(playlist)
 
 app.run(debug=True, port=5000)

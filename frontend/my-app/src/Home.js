@@ -2,7 +2,7 @@ import React from 'react';
 import SearchBar from './SearchBar';
 import './home.css';
 
-const Home = ({ onLogin ,onSongSelect}) => {
+const Home = ({ onLogin, onSongSelect}) => {
   return (
     <div className="app-container">
       <h1>Welcome to Gemerator!</h1>
@@ -12,6 +12,7 @@ const Home = ({ onLogin ,onSongSelect}) => {
           Login with Spotify
         </button>
       </div>
+      <h2>Or Start Here by Searching For Your Favorite Songs!</h2>
       <div className="search-bar">
         <SearchBar onSongSelect={onSongSelect} />
       </div>
