@@ -12,6 +12,7 @@ import '../App.css';
 const Root = styled(Card)(({ theme }) => ({
   display: 'flex',
   marginBottom: theme.spacing(2),
+  backgroundColor: '#E5B8F4',
   
 }));
 

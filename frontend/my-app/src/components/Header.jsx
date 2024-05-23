@@ -6,7 +6,7 @@ const Header = ({userInfo}) => {
   return (
     <header>
       <div className="left-header">
-        <img className='head-logo' src={logo} alt="Logo" />
+        <img className='head-logo' src={logo} alt="Logo"/>
         <h1>Gemerator</h1>
       </div>
       <div className="right-header">

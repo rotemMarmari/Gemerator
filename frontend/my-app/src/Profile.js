@@ -2,24 +2,6 @@ import React from 'react';
 import './App.css';
 import PlaylistContainer from './components/PlaylistContainer';
 
-// const Profile = ({ userInfo, userPlaylists, onLogout, handleSavePlaylist }) => {
-//   return (
-//     <div className="container">
-//       {userInfo && userInfo.name ? (
-//         <>
-//           <h1>Welcome, {userInfo.name}!</h1>
-//           <img src={userInfo.image} alt={`${userInfo.name}'s profile picture`} className="profile-image" />
-//           <PlaylistContainer userPlaylists={userPlaylists} handleSavePlaylist={handleSavePlaylist} />
-//           <button className="logout-button" onClick={onLogout}>
-//             Logout
-//           </button>
-//         </>
-//       ) : (
-//         <p>Loading...</p>
-//       )}
-//     </div>
-//   );
-// };
 
 const Profile = ({ userInfo, userPlaylists, onLogout }) => {
   return (
