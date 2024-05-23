@@ -4,7 +4,7 @@ import ListItem from '@mui/material/ListItem';
 import ListItemButton from '@mui/material/ListItemButton';
 import ListItemText from '@mui/material/ListItemText';
 import { FixedSizeList } from 'react-window';
-import { getProfile } from './api'; // Adjust the import based on your file structure
+import { getProfile } from './api'; 
 
 const VirtualizedPlaylists = ({ handleSavePlaylist }) => {
   const [playlists, setPlaylists] = useState([]);
@@ -30,7 +30,7 @@ const VirtualizedPlaylists = ({ handleSavePlaylist }) => {
   };
 
   return (
-    <Box sx={{ width: '100%', height: 400, maxWidth: 360, bgcolor: 'background.paper' }}>
+    <Box sx={{ width: '100%', height: 400, maxWidth: 360, bgcolor: '#810CA8' }}>
       <FixedSizeList
         height={400}
         width={360}

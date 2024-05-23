@@ -9,11 +9,14 @@
 
 .App {
   text-align: center;
+  background-color: #290A50;
 }
 
 .head-logo{
   height: 3rem;
   width: 3rem;
+  color: white;
+  fill: white;
 }
 
 .left-header{
@@ -29,21 +32,26 @@
 .user-header{
   display: flex;
   gap: 0.4rem;
-  background-color: #dceae6;
+  background-color: #D7DBFF;
+  /* background-color: #dceae6; */
   padding: 0.4rem;
-  border-radius: 10px;
+  border-radius: 50px;
 }
 .user-header h2{
-  color: #4D869C;
-  font-size: 1.3rem;
+  /* color: #4D869C; */
+  color: #400073;
+  font-size: 1rem;
   align-content: center;
+  text-align: center;
 }
 
 .app-container {
   background-color: #EEF7FF;
+  background-color: #290A50;
   min-height: 100vh; /* Ensure the container takes up the full viewport height */
   display: flex;
   flex-direction: column; /* Stack the header and content vertically */
+  color: #FFFFFF
 }
 
 .profile-image {
@@ -67,8 +75,9 @@ header {
   padding: 0 1.7rem;
   display: flex;
   height: 5rem;
-  background-color: #CDE8E5;
-  box-shadow: 0 4px 6px rgba(186, 167, 167, 0.25);
+  background-color: #400073;
+  /* background-color: #CDE8E5; */
+  box-shadow: 0 4px 6px rgba(103, 81, 107, 0.25);
   justify-content: space-between;
   align-items: center;
   color: white;
@@ -82,17 +91,6 @@ header {
 
 .logout-button {
   align-self: flex-end;
-  padding: 10px 20px;
-  background-color: #1db954;
-  color: white;
-  border: none;
-  border-radius: 20px;
-  cursor: pointer;
-  font-size: 16px;
-}
-
-.login-button {
-  align-self: center;
   padding: 10px 20px;
   background-color: #1db954;
   color: white;
