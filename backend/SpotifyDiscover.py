@@ -115,14 +115,36 @@ def flatten_dict_list(dict_list):
             
     return flattened_dict
 
-def recommend_songs(song_list, spotify_data, song_cluster_pipeline, n_songs=10):
-    # Flatten the input song list
-    song_dict = flatten_dict_list(song_list)
+# def recommend_songs(song_list, spotify_data, song_cluster_pipeline, n_songs=10):
+#     # Flatten the input song list
+#     song_dict = flatten_dict_list(song_list)
     
-    # Get mean vector of input songs
+#     # Get mean vector of input songs
+#     song_center = get_mean_vector(song_list, spotify_data)
+    
+#     # Scale the Spotify data
+#     scaler = song_cluster_pipeline.steps[0][1]
+#     scaled_data = scaler.transform(spotify_data[feature_cols])
+#     scaled_song_center = scaler.transform(song_center.reshape(1, -1))
+    
+#     # Compute cosine similarity between the input songs and Spotify data
+#     similarities = cosine_similarity(scaled_song_center, scaled_data)
+    
+#     # Get indices of top N similar songs
+#     index = np.argsort(similarities[0])[-n_songs:][::-1]
+    
+#     # Filter out songs already in input list
+#     rec_songs = spotify_data.iloc[index]
+#     rec_songs = rec_songs[~rec_songs['name'].isin(song_dict['name'])]
+    
+#     # Return recommended songs
+#     metadata_cols = ['name', 'year', 'artists', 'id']
+#     return rec_songs[metadata_cols].to_dict(orient='records')
+
+def recommend_songs(song_list, spotify_data, song_cluster_pipeline, n_songs=10):
+    song_dict = flatten_dict_list(song_list)
     song_center = get_mean_vector(song_list, spotify_data)
     
-    # Scale the Spotify data
     scaler = song_cluster_pipeline.steps[0][1]
     scaled_data = scaler.transform(spotify_data[feature_cols])
     scaled_song_center = scaler.transform(song_center.reshape(1, -1))
@@ -130,16 +152,38 @@ def recommend_songs(song_list, spotify_data, song_cluster_pipeline, n_songs=10):
     # Compute cosine similarity between the input songs and Spotify data
     similarities = cosine_similarity(scaled_song_center, scaled_data)
     
-    # Get indices of top N similar songs
-    index = np.argsort(similarities[0])[-n_songs:][::-1]
+    # Initialize an empty list to store unique recommended songs
+    unique_rec_songs = []
+
+    # Variable to control how many songs to fetch each iteration
+    fetch_factor = 2
+
+    while len(unique_rec_songs) < n_songs:
+        # Calculate how many songs to fetch
+        num_to_fetch = n_songs * fetch_factor 
+        index = np.argsort(similarities[0])[-num_to_fetch:][::-1]
+        
+        rec_songs = spotify_data.iloc[index]
+        
+        rec_songs = rec_songs[~rec_songs['id'].isin(song_dict['id'])]        
+        rec_songs = rec_songs.drop_duplicates(subset='id')
+        
+        # Append new unique recommendations to the list
+        for _, song in rec_songs.iterrows():
+            if song['id'] not in [s['id'] for s in unique_rec_songs]:
+                unique_rec_songs.append(song)
+            if len(unique_rec_songs) >= n_songs:
+                break
+        
+        fetch_factor *= 2
+        
+    rec_songs_df = pd.DataFrame(unique_rec_songs)
     
-    # Filter out songs already in input list
-    rec_songs = spotify_data.iloc[index]
-    rec_songs = rec_songs[~rec_songs['name'].isin(song_dict['name'])]
+    rec_songs_df = rec_songs_df.head(n_songs)
     
-    # Return recommended songs
+    # Return recommended songs metadata
     metadata_cols = ['name', 'year', 'artists', 'id']
-    return rec_songs[metadata_cols].to_dict(orient='records')
+    return rec_songs_df[metadata_cols].to_dict(orient='records')
 
 def create_recommended_playlists(song_list, data, song_cluster_pipeline, n_songs, n_playlists):
     playlist = recommend_songs(song_list, data, song_cluster_pipeline, n_songs=n_songs)    
