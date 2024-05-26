@@ -12,6 +12,10 @@ import { ClipLoader } from 'react-spinners'; // Import the spinner
 import Button from '@mui/material/Button';
 import SearchBar from './SearchBar'; // Import SearchBar
 
+const PLAYLIST_AMOUNT = 10;
+let refreshIndex = 0;
+let recPlaylists;
+
 const App = () => {
   const [userInfo, setUserInfo] = useState(null);
   const [playlists, setPlaylists] = useState([]);
@@ -36,13 +40,21 @@ const App = () => {
     setPlaylistId(playlistId);
     setLoading(true); // Show the spinner
     savePlaylist(playlistId).then(response => {
-      setRecommendedPlaylist(response.data);
+      // refreshIndex = 0;
+      recPlaylists = response.data;
+      setRecommendedPlaylist(recPlaylists[refreshIndex]);
       setLoading(false); // Hide the spinner
     }).catch(error => {
       console.error('Error saving playlist:', error);
       setLoading(false); // Hide the spinner in case of error
     });
   };
+
+  
+  const handleRefresh = () => {
+    refreshIndex = (refreshIndex + 1) % PLAYLIST_AMOUNT;
+    setRecommendedPlaylist(recPlaylists[refreshIndex]);
+  }
 
   const handleLogin = () => {
     login().then(() => setIsAuthenticated(true));
@@ -107,7 +119,7 @@ const App = () => {
             recommendedPlaylist.length > 0 && (
               <div>
                 <h2>Recommended Songs</h2>
-                <Button variant="contained" color="primary" onClick={handleSavePlaylist}>
+                <Button variant="contained" color="primary" onClick={handleRefresh}>
                   Refresh songs
                 </Button>
                 <div className="song-cards-container">
