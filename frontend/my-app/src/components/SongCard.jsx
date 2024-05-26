@@ -13,7 +13,7 @@ const Root = styled(Card)(({ theme }) => ({
   display: 'flex',
   marginBottom: theme.spacing(2),
   backgroundColor: '#E5B8F4',
-  
+  padding: theme.spacing(2), // Adjust padding if needed
 }));
 
 const Details = styled('div')({
