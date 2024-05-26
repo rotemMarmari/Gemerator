@@ -280,13 +280,15 @@ def save_playlist(playlist_id):
             }
             playlist_tracks_data.append(song)
 
-    playlist = recommend_songs(playlist_tracks_data, data,song_cluster_pipeline, n_songs=21)
-    get_preview_urls(playlist)
-    get_album_cover_urls(playlist)
-    for index, song in enumerate(playlist, start=1):
-        print(index, song['name'])
+    # playlist = recommend_songs(playlist_tracks_data, data,song_cluster_pipeline, n_songs=21)
+    playlists = create_recommended_playlists(playlist_tracks_data, data, song_cluster_pipeline, n_songs=210, n_playlists=10)
+    for playlist in playlists:
+        get_preview_urls(playlist)
+        get_album_cover_urls(playlist)
+    # for index, song in enumerate(playlist, start=1):
+    #     print(index, song['name'])
     #return playlist
-    return jsonify(playlist)
+    return jsonify(playlists)
 
 def get_preview_urls(playlist):
     uri_list = [song_info['id'] for song_info in playlist]
