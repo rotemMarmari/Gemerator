@@ -413,13 +413,13 @@ def recommend():
     if not selected_songs:
         return jsonify({"error": "No songs selected"})
 
-    playlist = recommend_songs(selected_songs, data, song_cluster_pipeline, n_songs=21)
-    get_preview_urls(playlist)
-    get_album_cover_urls(playlist)
-    
-    for index, song in enumerate(playlist, start=1):
-        print(index, song['name'], "by", song["artists"])
-        
-    return jsonify(playlist)
+    playlists = create_recommended_playlists(selected_songs, data, song_cluster_pipeline, n_songs=210, n_playlists=10)
+    for playlist in playlists:
+        get_preview_urls(playlist)
+        get_album_cover_urls(playlist)
+    # for index, song in enumerate(playlist, start=1):
+    #     print(index, song['name'])
+    #return playlist
+    return jsonify(playlists)
 
 app.run(debug=True, port=5000)

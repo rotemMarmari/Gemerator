@@ -75,9 +75,10 @@ const App = () => {
     console.log('Selected song:', song);
   };
 
-  const handleRecommend = (recommendedSongs) => {
+  const handleRecommend = (recommendedPlaylists) => {
     setLoading(true); // Show the spinner
-    setRecommendedPlaylist(recommendedSongs);
+    recPlaylists = recommendedPlaylists;
+    setRecommendedPlaylist(recPlaylists[refreshIndex]);
     setLoading(false); 
   };
 
@@ -94,11 +95,19 @@ const App = () => {
               <ClipLoader size={50} color={"#123abc"} loading={loading} />
             </div>
           ) : (
-          <div className="song-cards-container">
-            {recommendedPlaylist.map(song => (
-              <SongCard key={song.id} song={song} playlistId={playlistId} />
-            ))}
-          </div>
+            recommendedPlaylist.length > 0 && (
+            <div>
+              <h2>Recommended Songs</h2>
+              <Button variant="contained" color="primary" onClick={handleRefresh}>
+                Refresh songs
+              </Button>
+              <div className="song-cards-container">
+                {recommendedPlaylist.map(song => (
+                  <SongCard key={song.id} song={song} playlistId={playlistId} />
+                ))}
+              </div>
+            </div>
+          )
           ) }
       </div>
 
