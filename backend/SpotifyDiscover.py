@@ -1,11 +1,11 @@
 import spotipy
 from spotipy.oauth2 import SpotifyOAuth
 from spotipy.oauth2 import SpotifyClientCredentials
-from spotipy.cache_handler import CacheFileHandler
 
 import os
 import time
 import random
+import joblib
 
 from flask import Flask, request, url_for, session, redirect, render_template, send_from_directory, jsonify
 from flask_cors import CORS
@@ -13,10 +13,6 @@ from flask_cors import CORS
 import numpy as np
 import pandas as pd
 
-from sklearn.cluster import KMeans
-from sklearn.preprocessing import StandardScaler
-from sklearn.pipeline import Pipeline
-from sklearn.metrics import euclidean_distances
 from sklearn.metrics.pairwise import cosine_similarity
 
 from collections import defaultdict
@@ -40,17 +36,7 @@ data = pd.read_csv('Data/final_dataset.csv')
 feature_cols = ['valence', 'year', 'acousticness', 'danceability', 'duration_ms', 'energy',
 'instrumentalness', 'liveness', 'loudness', 'mode', 'speechiness', 'tempo', 'popularity']
 
-clustered_data = data.copy()
-song_cluster_pipeline = Pipeline([('scaler', StandardScaler()), 
-                                  ('kmeans', KMeans(n_clusters=20, 
-                                   verbose=False))
-                                 ], verbose=False)
- 
-X = clustered_data[feature_cols]
-song_cluster_pipeline.fit(X)
-song_cluster_labels = song_cluster_pipeline.predict(X)
-clustered_data['cluster_label'] = song_cluster_labels
-
+song_cluster_pipeline = joblib.load('song_cluster_pipeline.pkl')
 
 sp = spotipy.Spotify(auth_manager=SpotifyClientCredentials(client_id=CLIENT_ID, client_secret=CLIENT_SECRET))
 
@@ -67,7 +53,7 @@ def find_song(track_id):
     
     song_data['name'] = [results['name']]
     song_data['year'] = int(results['album']['release_date'][:4]), 
-    song_data['explicit'] = [int(results['explicit'])]
+    # song_data['explicit'] = [int(results['explicit'])]
     song_data['duration_ms'] = [results['duration_ms']]
     song_data['popularity'] = [results['popularity']]
     song_data['preview_url'] = preview_url
@@ -76,7 +62,17 @@ def find_song(track_id):
         song_data[key] = value
         
     return pd.DataFrame(song_data)
-
+      
+def get_preview_and_album_cover(playlist):
+    uri_list = [song_info['id'] for song_info in playlist]
+    track_infos = sp.tracks(uri_list)['tracks']
+    for i, song_info in enumerate(playlist):
+        track_info = track_infos[i]
+        if track_info['album']['images'][0]['url']:
+            song_info['album_cover_url'] = track_info['album']['images'][0]['url']
+        if track_info['preview_url']:
+            song_info['preview_url'] = track_info['preview_url']   
+            
 def get_song_data(song, spotify_data):
     # try to find the song in the dataset
     try:
@@ -87,7 +83,6 @@ def get_song_data(song, spotify_data):
         song_data = find_song(song['id'])
         return song_data
         
-
 def get_mean_vector(song_list, spotify_data):   
     song_vectors = []
     
@@ -114,32 +109,6 @@ def flatten_dict_list(dict_list):
             flattened_dict[key].append(value)
             
     return flattened_dict
-
-# def recommend_songs(song_list, spotify_data, song_cluster_pipeline, n_songs=10):
-#     # Flatten the input song list
-#     song_dict = flatten_dict_list(song_list)
-    
-#     # Get mean vector of input songs
-#     song_center = get_mean_vector(song_list, spotify_data)
-    
-#     # Scale the Spotify data
-#     scaler = song_cluster_pipeline.steps[0][1]
-#     scaled_data = scaler.transform(spotify_data[feature_cols])
-#     scaled_song_center = scaler.transform(song_center.reshape(1, -1))
-    
-#     # Compute cosine similarity between the input songs and Spotify data
-#     similarities = cosine_similarity(scaled_song_center, scaled_data)
-    
-#     # Get indices of top N similar songs
-#     index = np.argsort(similarities[0])[-n_songs:][::-1]
-    
-#     # Filter out songs already in input list
-#     rec_songs = spotify_data.iloc[index]
-#     rec_songs = rec_songs[~rec_songs['name'].isin(song_dict['name'])]
-    
-#     # Return recommended songs
-#     metadata_cols = ['name', 'year', 'artists', 'id']
-#     return rec_songs[metadata_cols].to_dict(orient='records')
 
 def recommend_songs(song_list, spotify_data, song_cluster_pipeline, n_songs=10):
     song_dict = flatten_dict_list(song_list)
@@ -177,8 +146,7 @@ def recommend_songs(song_list, spotify_data, song_cluster_pipeline, n_songs=10):
         
         fetch_factor *= 2
         
-    rec_songs_df = pd.DataFrame(unique_rec_songs)
-    
+    rec_songs_df = pd.DataFrame(unique_rec_songs)   
     rec_songs_df = rec_songs_df.head(n_songs)
     
     # Return recommended songs metadata
@@ -196,8 +164,10 @@ def create_recommended_playlists(song_list, data, song_cluster_pipeline, n_songs
         playlists = playlists[:n_playlists]
     
     for pl in playlists:
-        get_preview_urls(pl)
-    
+        get_preview_and_album_cover(pl)
+        # get_preview_urls(pl)
+        # get_album_cover_urls(pl)
+
     return playlists
 
 ###############################################################################################33
@@ -260,9 +230,9 @@ def save_playlist(playlist_id):
         for item in saved_tracks:
             track = item['track']
             song = {
-                'name': track['name'],
-                'artists': ', '.join([artist['name'] for artist in track['artists']]),
-                'year': int(track['album']['release_date'][:4]),
+                # 'name': track['name'],
+                # 'artists': ', '.join([artist['name'] for artist in track['artists']]),
+                # 'year': int(track['album']['release_date'][:4]),
                 'id': track['id']
             }
             playlist_tracks_data.append(song)
@@ -273,43 +243,17 @@ def save_playlist(playlist_id):
         for item in playlist_tracks:
             track = item['track']
             song = {
-                'name': track['name'],
-                'artists': ', '.join([artist['name'] for artist in track['artists']]),
-                'year': int(track['album']['release_date'][:4]),
+                # 'name': track['name'],
+                # 'artists': ', '.join([artist['name'] for artist in track['artists']]),
+                # 'year': int(track['album']['release_date'][:4]),
                 'id': track['id']                
             }
             playlist_tracks_data.append(song)
 
     # playlist = recommend_songs(playlist_tracks_data, data,song_cluster_pipeline, n_songs=21)
     playlists = create_recommended_playlists(playlist_tracks_data, data, song_cluster_pipeline, n_songs=210, n_playlists=10)
-    for playlist in playlists:
-        get_preview_urls(playlist)
-        get_album_cover_urls(playlist)
-    # for index, song in enumerate(playlist, start=1):
-    #     print(index, song['name'])
-    #return playlist
+
     return jsonify(playlists)
-
-def get_preview_urls(playlist):
-    uri_list = [song_info['id'] for song_info in playlist]
-    track_infos = sp.tracks(uri_list)['tracks']
-    for i, song_info in enumerate(playlist):
-        track_info = track_infos[i]
-        if track_info['preview_url']:
-            song_info['preview_url'] = track_info['preview_url']
-        else:
-            artists = eval(song_info['artists'])
-            artist_string = ", ".join(artists)
-            result_df = find_song(song_info['id'])
-            song_info['preview_url'] = result_df['preview_url'].to_string(index=False)
-
-def get_album_cover_urls(playlist):
-    uri_list = [song_info['id'] for song_info in playlist]
-    track_infos = sp.tracks(uri_list)['tracks']
-    for i, song_info in enumerate(playlist):
-        track_info = track_infos[i]
-        if track_info['album']['images'][0]['url']:
-            song_info['album_cover_url'] = track_info['album']['images'][0]['url']
 
 @app.route('/add_song_to_playlist/<playlist_id>/<track_id>', methods=['POST'])
 def add_song_to_playlist(playlist_id, track_id):
@@ -366,8 +310,6 @@ def create_spotify_oauth():
                          scope='user-library-read playlist-modify-public playlist-modify-private playlist-read-private')
                            #cache_handler=CacheFileHandler(cache_path=".cache"))
 
-##############################################################
-
 selected_songs = []
 
 @app.route('/search', methods=['GET'])
@@ -411,15 +353,10 @@ def remove_song(song_id):
 def recommend():
     global selected_songs
     if not selected_songs:
-        return jsonify({"error": "No songs selected"})
+        return jsonify({"error": "No songs selected"}), 400
 
     playlists = create_recommended_playlists(selected_songs, data, song_cluster_pipeline, n_songs=210, n_playlists=10)
-    for playlist in playlists:
-        get_preview_urls(playlist)
-        get_album_cover_urls(playlist)
-    # for index, song in enumerate(playlist, start=1):
-    #     print(index, song['name'])
-    #return playlist
+    
     return jsonify(playlists)
 
 app.run(debug=True, port=5000)
