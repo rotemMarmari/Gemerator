@@ -92,15 +92,14 @@ header {
   font-weight: bold;
 }
 
-.logout-button {
-  align-self: flex-end;
-  padding: 10px 20px;
-  background-color: #1db954;
-  color: white;
-  border: none;
-  border-radius: 20px;
-  cursor: pointer;
-  font-size: 16px;
+.recommendations{
+  display: contents;
+  flex-direction: column;
+  margin: 5px;
+}
+
+.recommendations button{
+  margin: 1rem;
 }
 
 .container {

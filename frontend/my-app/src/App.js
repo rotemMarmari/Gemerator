@@ -11,6 +11,8 @@ import Checkbox from '@mui/material/Checkbox';
 import { ClipLoader } from 'react-spinners'; // Import the spinner
 import Button from '@mui/material/Button';
 import SearchBar from './SearchBar'; // Import SearchBar
+import Profile from './Profile';
+import Footer from './components/Footer';
 
 const PLAYLIST_AMOUNT = 10;
 let refreshIndex = 0;
@@ -96,7 +98,7 @@ const App = () => {
             </div>
           ) : (
             recommendedPlaylist.length > 0 && (
-            <div>
+            <div className='recommendations'>
               <h2>Recommended Songs</h2>
               <Button variant="contained" color="primary" onClick={handleRefresh}>
                 Refresh songs
@@ -112,35 +114,13 @@ const App = () => {
       </div>
 
       ) : (
-        <div className='container'>
-          <h1>Welcome, {userInfo?.name}</h1>
-          <button onClick={handleLogout} className="logout-button">Logout</button>
-          <h2>Your Playlists</h2>
-          <FormGroup>
-            <FormControlLabel control={<Checkbox defaultChecked />} label="Use listening history" />
-          </FormGroup>
-          <VirtualizedPlaylists handleSavePlaylist={handleSavePlaylist} />
-          {loading ? (
-            <div className="spinner-container">
-              <ClipLoader size={50} color={"#123abc"} loading={loading} />
-            </div>
-          ) : (
-            recommendedPlaylist.length > 0 && (
-              <div>
-                <h2>Recommended Songs</h2>
-                <Button variant="contained" color="primary" onClick={handleRefresh}>
-                  Refresh songs
-                </Button>
-                <div className="song-cards-container">
-                  {recommendedPlaylist.map(song => (
-                    <SongCard key={song.id} song={song} playlistId={playlistId} />
-                  ))}
-                </div>
-              </div>
-            )
-          )}
-        </div>
+        <Profile 
+          userInfo={userInfo}
+          userPlaylists={playlists}
+          onLogout={handleLogout}
+        />
       )}
+      <Footer />
     </div>
   );
 };

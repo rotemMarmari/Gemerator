@@ -3,13 +3,13 @@
 }
 
 .login-button-container {
-  display: flex;
-  justify-content: center;
-  margin: 20px 0;
+  justify-content: left;
+  margin: 40px;
+  text-align: left;
+
 }
 
 .login-button {
-  align-self: center;
   padding: 8px 15px;
   background-color: #1db954;
   color: black;
@@ -17,6 +17,7 @@
   border-radius: 50px;
   cursor: pointer;
   font-size: 1rem;
+  margin: 1rem;
 }
 
 .login-button:hover {
@@ -40,6 +41,35 @@
   align-items: flex-start;
   gap: 20px;
   margin-top: 20px;
+}
+
+.home-greeting {
+  color: #F3CA52;
+  margin: 4rem;
+}
+
+.home-greeting h1 {
+  font-size: 4.5rem;
+  font-weight: 800;
+  margin-bottom: 20px;
+  text-align: left;
+}
+
+.home-greeting h2 {
+  font-size: 2.2rem;
+  font-weight: 500;
+  margin-bottom: 20px;
+  margin-left: 0.7rem;
+  text-align: left;
+}
+
+.home-greeting p {
+  color:#ffffffda;
+  font-size: 1rem;
+  font-weight: 400;
+  margin-bottom: 20px;
+  text-align: left;
+  box-sizing: 50px;
 }
 
 .search-bar {

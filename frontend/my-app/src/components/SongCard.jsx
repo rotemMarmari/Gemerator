@@ -11,8 +11,9 @@ import '../App.css';
 
 const Root = styled(Card)(({ theme }) => ({
   display: 'flex',
-  marginBottom: theme.spacing(2),
-  
+  marginBottom: theme.spacing(1),
+  backgroundColor: '#E5B8F4',
+  padding: theme.spacing(0.2),
 }));
 
 const Details = styled('div')({
@@ -27,6 +28,7 @@ const Content = styled(CardContent)({
 const Cover = styled(CardMedia)({
   width: 100,
   height: 100,
+  borderRadius: '5px',
 });
 
 const Controls = styled('div')(({ theme }) => ({

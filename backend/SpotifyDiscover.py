@@ -274,7 +274,7 @@ def add_song_to_playlist(playlist_id, track_id):
 
         return jsonify({"message": message})
     except spotipy.exceptions.SpotifyException as e:
-        return jsonify({"error": str(e)}), 400
+        return jsonify({"error": str(e)})
 
 
 @app.route('/logout', methods=['POST'])
@@ -353,7 +353,7 @@ def remove_song(song_id):
 def recommend():
     global selected_songs
     if not selected_songs:
-        return jsonify({"error": "No songs selected"}), 400
+        return jsonify({"error": "No songs selected"})
 
     playlists = create_recommended_playlists(selected_songs, data, song_cluster_pipeline, n_songs=210, n_playlists=10)
     

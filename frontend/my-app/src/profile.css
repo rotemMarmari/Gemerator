@@ -1,0 +1,93 @@
+*{
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'CircularSp', 'CircularSp-Arab', 'CircularSp-Hebr', 'CircularSp-Cyrl', 'CircularSp-Grek', 'CircularSp-Deva', sans-serif;
+    font-weight: 700;
+    font-style: normal;
+  }
+
+  body {
+    background-color: #290A50;
+  }
+
+
+.profile-app{
+    padding: 20px;
+    justify-content: center;
+    align-items: center;
+  }
+
+ .upper-section {
+    display: flex;
+    padding: 10px;
+    margin: 20px;
+  }
+
+  .greeting{
+    display: flex;
+    flex-direction: column;
+    color: #F3CA52;
+    padding: 5rem;
+  }
+
+.logout-button {
+    padding: 10px 20px;
+    background-color: #1db954;
+    color: white;
+    border: none;
+    border-radius: 50px;
+    cursor: pointer;
+    font-size: 16px;
+    margin: 2rem;
+    position: static;
+    width: 8rem;
+}
+
+.logout-button:hover{
+    padding: 10px 20px;
+    background-color: #1bce5a;
+    color: white;
+    border: none;
+    border-radius: 50px;
+    cursor: pointer;
+    font-size: 16px;
+}
+
+.profile-app img {
+    display: flex;
+    align-items: center;
+    height: 200px;
+    width: 200px;
+    border-radius: 40px;
+  }
+
+.profile-app h1 {
+    font-size: 70px;
+    font-weight: 700;
+    margin-bottom: 20px;
+    text-align: left;
+}
+
+.profile-app h2 {
+    font-size: 50px;
+    font-weight: 700;
+    margin-bottom: 20px;
+    text-align: left;
+}
+
+.list-container {
+    justify-content: center;
+    position: center;
+    justify-content: center;
+  }
+
+  .list-container h3{
+    justify-content: center;
+    align-items: center;
+    font-size: 30px;
+  }
+
+  .recommendations button{
+    margin: 1rem;
+  }
