@@ -12,8 +12,7 @@ import '../App.css';
 const Root = styled(Card)(({ theme }) => ({
   display: 'flex',
   marginBottom: theme.spacing(2),
-  backgroundColor: '#E5B8F4',
-  padding: theme.spacing(2), // Adjust padding if needed
+  
 }));
 
 const Details = styled('div')({
@@ -61,11 +60,15 @@ const SongCard = ({ song, playlistId }) => {
           </Typography>
         </Content>
         <Controls>
-          {song.preview_url && (
+        {song.preview_url ? (
             <audio controls>
               <source src={song.preview_url} type="audio/mpeg" />
               Your browser does not support the audio element.
             </audio>
+          ) : (
+            <Typography variant="body2" color="textSecondary">
+              Preview not available
+            </Typography>
           )}
           <IconButton aria-label="add" onClick={handleAddClick}>
             <AddIcon />
