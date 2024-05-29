@@ -1,41 +1,56 @@
 .footer {
-    background-color: #0000009a;
-    color: #fff;
-    padding: 20px 0;
-  }
-  
-  .footer-container {
-    display: flex;
-    justify-content: space-around;
-    flex-wrap: wrap;
-  }
-  
-  .footer-section {
-    margin: 10px;
-    flex: 1;
-  }
-  
-  .footer-section h3 {
-    margin-bottom: 10px;
-  }
-  
-  .footer-section p {
-    margin: 5px 0;
-  }
-  
-  .footer-section a {
-    color: #1e90ff;
-    text-decoration: none;
-  }
-  
-  .footer-section a:hover {
-    text-decoration: underline;
-  }
-  
-  .footer-bottom {
-    text-align: center;
-    padding-top: 10px;
-    border-top: 1px solid #444;
-    margin-top: 20px;
-  }
-  
+  background-color: #0000009a;
+  color: #fff;
+  padding: 20px 0;
+}
+
+.footer-container {
+  display: flex;
+  justify-content: space-around;
+  flex-wrap: wrap;
+}
+
+.footer-section {
+  margin: 10px;
+  flex: 1;
+}
+
+.footer-section h3 {
+  margin-bottom: 10px;
+}
+
+.footer-section p {
+  margin: 5px 0;
+}
+
+.footer-section a {
+  color: #1e90ff;
+  text-decoration: none;
+}
+
+.footer-section a:hover {
+  text-decoration: underline;
+}
+
+.footer-section .social-icon {
+  font-size: 2rem;
+  color: #fff;
+  transition: color 0.3s;
+}
+
+.footer-section .social-icon:hover {
+  color: #1e90ff;
+  align-items: center;
+  justify-content: center;
+}
+
+.MuiStack-root.css-pl8gqh-MuiStack-root {
+  justify-content: center;
+}
+
+.footer-bottom {
+  text-align: center;
+  padding-top: 10px;
+  border-top: 1px solid #444;
+  margin-top: 20px;
+}

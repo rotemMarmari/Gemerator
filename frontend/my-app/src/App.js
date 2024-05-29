@@ -4,10 +4,9 @@ import './App.css';
 import Home from './Home';
 import Header from './components/Header';
 import SongCard from './components/SongCard';
-import VirtualizedPlaylists from './VirtualizedPlaylists'; 
-import FormGroup from '@mui/material/FormGroup';
-import FormControlLabel from '@mui/material/FormControlLabel';
-import Checkbox from '@mui/material/Checkbox';
+import Box from '@mui/material/Box'; // Import Box from MUI
+import Rating from '@mui/material/Rating'; // Import Rating from MUI
+import Typography from '@mui/material/Typography'; // Import Typography from MUI
 import { ClipLoader } from 'react-spinners'; // Import the spinner
 import Button from '@mui/material/Button';
 import SearchBar from './SearchBar'; // Import SearchBar
@@ -26,6 +25,7 @@ const App = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [loading, setLoading] = useState(false); // State to manage loading spinner
   const [savedSong, setSavedSong] = useState(null); // State to manage the saved song
+  const [ratingValue, setRatingValue] = useState(0); // State to manage the rating
 
   useEffect(() => {
     if (isAuthenticated) {
@@ -103,6 +103,22 @@ const App = () => {
               <Button variant="contained" color="primary" onClick={handleRefresh}>
                 Refresh songs
               </Button>
+              <Box sx={{ '& > legend': { mt: 2 } }}>
+                <Typography component="legend">Rate the playlists</Typography>
+                <Rating
+                  name="playlist-rating"
+                  value={ratingValue}
+                  onChange={(event, newValue) => {
+                    setRatingValue(newValue);
+                    
+                  }}
+                  sx={{
+                    '& .MuiRating-iconEmpty': {
+                      color: 'rgba(255, 255, 255, 0.8)', // White color for empty star borders
+                    }
+                  }}
+                />
+              </Box>
               <div className="song-cards-container">
                 {recommendedPlaylist.map(song => (
                   <SongCard key={song.id} song={song} playlistId={playlistId} />
