@@ -29,6 +29,7 @@
     flex-direction: column;
     color: #F3CA52;
     padding: 5rem;
+    width: 34rem;
   }
 
 .logout-button {

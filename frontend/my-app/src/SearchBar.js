@@ -62,7 +62,7 @@ const SearchBar = ({ onSongSelect }) => {
           type="text" 
           value={query} 
           onChange={handleSearch} 
-          placeholder="Search for a song or artist..." 
+          placeholder="Search for a song or artist" 
           className="search-input"
         />
         {suggestions.length > 0 && (

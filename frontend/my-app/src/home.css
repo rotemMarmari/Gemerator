@@ -2,11 +2,20 @@
   text-align: center;
 }
 
+.upper-container{
+  display: flex;
+}
+
 .login-button-container {
   justify-content: left;
-  margin: 40px;
+  margin-left: 8rem;
   text-align: left;
+}
 
+.search-song-container{
+  justify-content: center;
+  align-items: center;
+  margin-top: 6rem;
 }
 
 .login-button {
@@ -46,6 +55,7 @@
 .home-greeting {
   color: #F3CA52;
   margin: 4rem;
+  max-width: 530px;
 }
 
 .home-greeting h1 {
@@ -66,10 +76,11 @@
 .home-greeting p {
   color:#ffffffda;
   font-size: 1rem;
-  font-weight: 400;
+  font-weight: 500;
   margin-bottom: 20px;
   text-align: left;
   box-sizing: 50px;
+  padding-left: 1rem;
 }
 
 .search-bar {

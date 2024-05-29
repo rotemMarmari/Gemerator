@@ -14,7 +14,7 @@ const SelectedSongs = ({ selectedSongs, onSongRemove, onRecommend }) => {
           </li>
         ))}
       </ul>
-      <button onClick={onRecommend} className="recommend-button">Recommend Songs</button>
+      <button onClick={onRecommend} className="btn">Generate playlists</button>
     </div>
   );
 };
