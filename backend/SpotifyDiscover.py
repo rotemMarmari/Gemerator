@@ -24,14 +24,18 @@ CORS(app, supports_credentials=True, resources={r"/*": {"origins": "http://local
 app.config['SESSION_COOKIE_ NAME'] = 'spotify cookie'
 app.secret_key = 'dbs*eit4^3785h!g8i9@0puew?r5'
 
-TOKEN_INFO = 'token_info'
-CLIENT_ID ='11b6d46776d545af9be0a471e6ba9e56'
+TOKEN_INFO    = 'token_info'
+CLIENT_ID     = '11b6d46776d545af9be0a471e6ba9e56'
 CLIENT_SECRET = '128ce551f20e4d6e88e6f83f8766655a'
-REDIRECT_URI = 'http://localhost:5000'
+REDIRECT_URI  = 'http://localhost:5000'
+
+use_history = False
+history_list = []
 
 ###############################################################################################
 
 data = pd.read_csv('Data/final_dataset.csv')
+data.set_index('id', inplace=True)
 
 feature_cols = ['valence', 'year', 'acousticness', 'danceability', 'duration_ms', 'energy',
 'instrumentalness', 'liveness', 'loudness', 'mode', 'speechiness', 'tempo', 'popularity']
@@ -53,7 +57,6 @@ def find_song(track_id):
     
     song_data['name'] = [results['name']]
     song_data['year'] = int(results['album']['release_date'][:4]), 
-    # song_data['explicit'] = [int(results['explicit'])]
     song_data['duration_ms'] = [results['duration_ms']]
     song_data['popularity'] = [results['popularity']]
     song_data['preview_url'] = preview_url
@@ -139,11 +142,18 @@ def recommend_songs(song_list, spotify_data, song_cluster_pipeline, n_songs=10):
         
         # Append new unique recommendations to the list
         for _, song in rec_songs.iterrows():
-            if song['id'] not in [s['id'] for s in unique_rec_songs]:
+            is_duplicate = song['id'] in [s['id'] for s in unique_rec_songs]
+            # If not a duplicate by ID, check by name and artists
+            if not is_duplicate:
+                is_duplicate = any(
+                    (song['name'] == s['name'] and song['artists'] == s['artists']) 
+                    for s in unique_rec_songs
+                )
+            if not is_duplicate:
                 unique_rec_songs.append(song)
             if len(unique_rec_songs) >= n_songs:
                 break
-        
+
         fetch_factor *= 2
         
     rec_songs_df = pd.DataFrame(unique_rec_songs)   
@@ -170,7 +180,16 @@ def create_recommended_playlists(song_list, data, song_cluster_pipeline, n_songs
 
     return playlists
 
-###############################################################################################33
+def fetch_saved_tracks():
+    saved_tracks = []
+    results = sp.current_user_saved_tracks()
+    saved_tracks.extend(results['items'])
+    while results['next']:
+        results = sp.next(results)
+        saved_tracks.extend(results['items'])
+    return saved_tracks
+
+###############################################################################################
 
 @app.route('/')
 def home_page():
@@ -220,37 +239,22 @@ def save_playlist(playlist_id):
     playlist_tracks_data = []
     if playlist_id == 'saved_tracks':
         # Handle the case for 'Liked Songs' playlist
-        saved_tracks = []
-        results = sp.current_user_saved_tracks()
-        saved_tracks.extend(results['items'])
-        while results['next']:
-            results = sp.next(results)
-            saved_tracks.extend(results['items'])
+        saved_tracks = fetch_saved_tracks()
 
         for item in saved_tracks:
-            track = item['track']
-            song = {
-                # 'name': track['name'],
-                # 'artists': ', '.join([artist['name'] for artist in track['artists']]),
-                # 'year': int(track['album']['release_date'][:4]),
-                'id': track['id']
-            }
-            playlist_tracks_data.append(song)
+            song = {'id': item['track']['id']}  
+            playlist_tracks_data.append(song)     
     else:
         # Handle the case for other playlists
         playlist_tracks = sp.playlist_tracks(playlist_id)['items']
 
         for item in playlist_tracks:
-            track = item['track']
-            song = {
-                # 'name': track['name'],
-                # 'artists': ', '.join([artist['name'] for artist in track['artists']]),
-                # 'year': int(track['album']['release_date'][:4]),
-                'id': track['id']                
-            }
+            song = {'id': item['track']['id']}  
             playlist_tracks_data.append(song)
 
-    # playlist = recommend_songs(playlist_tracks_data, data,song_cluster_pipeline, n_songs=21)
+    if use_history:
+            playlist_tracks_data.extend(history_list)
+
     playlists = create_recommended_playlists(playlist_tracks_data, data, song_cluster_pipeline, n_songs=210, n_playlists=10)
 
     return jsonify(playlists)
@@ -276,7 +280,6 @@ def add_song_to_playlist(playlist_id, track_id):
     except spotipy.exceptions.SpotifyException as e:
         return jsonify({"error": str(e)}), 400
 
-
 @app.route('/logout', methods=['POST'])
 def logout():
     session.clear()
@@ -289,6 +292,14 @@ def logout():
             return jsonify({"message": "Logged out successfully and cache cleared"})
     return jsonify({"message": "Logged out successfully but no cache file found"})
 
+######## create route ########
+def toggle_history():
+    use_history = not use_history
+    if use_history:
+        results = sp.current_user_recently_played()
+        for item in results['items']:
+            song = {'id': item['track']['id']}  
+            history_list.append(song)
 
 def get_token():
     token_info = session.get(TOKEN_INFO, None)
@@ -330,7 +341,6 @@ def search_songs():
         songs.append(song)
     return jsonify(songs)
 
-
 @app.route('/songs', methods=['POST'])
 def add_song():
     song = request.json
@@ -353,7 +363,7 @@ def remove_song(song_id):
 def recommend():
     global selected_songs
     if not selected_songs:
-        return jsonify({"error": "No songs selected"}), 400
+        return jsonify({"error": "No songs selected"})
 
     playlists = create_recommended_playlists(selected_songs, data, song_cluster_pipeline, n_songs=210, n_playlists=10)
     
