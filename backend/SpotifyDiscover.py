@@ -6,12 +6,15 @@ import os
 import time
 import random
 import joblib
+import threading
+
 
 from flask import Flask, request, url_for, session, redirect, render_template, send_from_directory, jsonify
 from flask_cors import CORS
 
 import numpy as np
 import pandas as pd
+import pyarrow.feather as feather
 
 from sklearn.metrics.pairwise import cosine_similarity
 
@@ -31,11 +34,14 @@ REDIRECT_URI  = 'http://localhost:5000'
 
 use_history = False
 history_list = []
+selected_songs = []
 
 ###############################################################################################
 
-data = pd.read_csv('Data/final_dataset.csv')
-data.set_index('id', inplace=True)
+data_path = "data/final_dataset_with_urls.csv"
+
+data = pd.read_csv(data_path)
+# data = pd.read_feather(data_path)
 
 feature_cols = ['valence', 'year', 'acousticness', 'danceability', 'duration_ms', 'energy',
 'instrumentalness', 'liveness', 'loudness', 'mode', 'speechiness', 'tempo', 'popularity']
@@ -43,6 +49,41 @@ feature_cols = ['valence', 'year', 'acousticness', 'danceability', 'duration_ms'
 song_cluster_pipeline = joblib.load('song_cluster_pipeline.pkl')
 
 sp = spotipy.Spotify(auth_manager=SpotifyClientCredentials(client_id=CLIENT_ID, client_secret=CLIENT_SECRET))
+
+# def add_song_to_dataset(song_df):
+#     global data
+#     # Convert song_data to a DataFrame and reset the index
+#     data = pd.concat([data, song_df], ignore_index=True)
+#    # Append the new song data to the dataset file
+#     print("adding new song to data...", song_df['id'])
+#     song_df = song_df[data.columns]
+#     # feather.write_feather(data, 'data/final_dataset_with_urls - Copy.feather')
+#     data.to_feather('data/final_dataset_with_urls.feather')
+
+def add_row_to_data(song_df):
+    global data
+    # data.to_feather("data/final_dataset_with_urls.feather")
+    song_df.to_csv(data_path, mode='a', header=False, index=False)
+    print(song_df['id'], "added to data")
+    pass
+
+def update_data():
+    global data
+    # data.to_feather("data/final_dataset_with_urls - Copy.feather")
+    data.to_csv(data_path, index=False)
+    print("updated data")
+    pass
+
+def add_song_to_dataset(song_df):
+    global data
+    # Append the new song data to the in-memory dataset
+    data = pd.concat([data, song_df], ignore_index=True)
+    # Append the new song data to the dataset file
+    song_df = song_df[data.columns]
+
+    data_save_thread = threading.Thread(target=add_row_to_data, args=(song_df,))
+    data_save_thread.start()
+
 
 def find_song(track_id):
     song_data = defaultdict()
@@ -53,29 +94,50 @@ def find_song(track_id):
         return None
     
     audio_features = sp.audio_features(track_id)[0]
-    preview_url = results.get('preview_url')  # Check for preview_url existence
+    preview_url = results.get('preview_url') if results.get('preview_url') else "pna" # Check for preview_url existence
     
     song_data['name'] = [results['name']]
+    song_data['artists'] = [artist['name'] for artist in results['artists']],
     song_data['year'] = int(results['album']['release_date'][:4]), 
     song_data['duration_ms'] = [results['duration_ms']]
     song_data['popularity'] = [results['popularity']]
     song_data['preview_url'] = preview_url
-    
+    song_data['album_cover_url'] = [results['album']['images'][0]['url']]
+
     for key, value in audio_features.items():
         song_data[key] = value
-        
-    return pd.DataFrame(song_data)
+
+    song_df = pd.DataFrame(song_data)
+    
+    # Drop the specified columns
+    columns_to_drop = ['uri', 'track_href', 'analysis_url', 'time_signature', 'type', 'key']
+    song_df.drop(columns=columns_to_drop, inplace=True, errors='ignore')
       
-def get_preview_and_album_cover(playlist):
-    uri_list = [song_info['id'] for song_info in playlist]
-    track_infos = sp.tracks(uri_list)['tracks']
-    for i, song_info in enumerate(playlist):
-        track_info = track_infos[i]
-        if track_info['album']['images'][0]['url']:
-            song_info['album_cover_url'] = track_info['album']['images'][0]['url']
-        if track_info['preview_url']:
-            song_info['preview_url'] = track_info['preview_url']   
-            
+    return song_df
+
+def get_preview_and_album_cover(playlist, data):
+    uri_list = []
+    for song in playlist:
+        # song_data = data[(data['id'] == song['id'])].iloc[0]        
+        if song['album_cover_url'] == "acna":
+            uri_list.append(song['id'])
+     
+    if uri_list:
+        track_infos = sp.tracks(uri_list)['tracks']
+        for i, song_info in enumerate(playlist):
+            track_info = track_infos[i]
+            album_cover_url = track_info['album']['images'][0]['url'] if track_info['album']['images'] else None
+            preview_url = track_info['preview_url'] if track_info['preview_url'] else "pna"
+
+            # Update the playlist
+            if album_cover_url:
+                song_info['album_cover_url'] = album_cover_url
+            song_info['preview_url'] = preview_url
+
+            # Update the dataset
+            data.loc[data['id'] == song_info['id'], 'album_cover_url'] = album_cover_url
+            data.loc[data['id'] == song_info['id'], 'preview_url'] = preview_url
+
 def get_song_data(song, spotify_data):
     # try to find the song in the dataset
     try:
@@ -84,7 +146,12 @@ def get_song_data(song, spotify_data):
     # if the song is not in the dataset search Spotify for it
     except IndexError:
         song_data = find_song(song['id'])
-        return song_data
+        if song_data is not None:
+            # print(song_data['artists'])
+            add_song_to_dataset(song_data)
+            return song_data
+        else:
+            return None
         
 def get_mean_vector(song_list, spotify_data):   
     song_vectors = []
@@ -160,7 +227,7 @@ def recommend_songs(song_list, spotify_data, song_cluster_pipeline, n_songs=10):
     rec_songs_df = rec_songs_df.head(n_songs)
     
     # Return recommended songs metadata
-    metadata_cols = ['name', 'year', 'artists', 'id']
+    metadata_cols = ['name', 'year', 'artists', 'id', 'preview_url', 'album_cover_url']
     return rec_songs_df[metadata_cols].to_dict(orient='records')
 
 def create_recommended_playlists(song_list, data, song_cluster_pipeline, n_songs, n_playlists):
@@ -174,9 +241,10 @@ def create_recommended_playlists(song_list, data, song_cluster_pipeline, n_songs
         playlists = playlists[:n_playlists]
     
     for pl in playlists:
-        get_preview_and_album_cover(pl)
-        # get_preview_urls(pl)
-        # get_album_cover_urls(pl)
+        get_preview_and_album_cover(pl, data)
+
+    data_save_thread = threading.Thread(target=update_data)
+    data_save_thread.start()
 
     return playlists
 
@@ -193,6 +261,8 @@ def fetch_saved_tracks():
 
 @app.route('/')
 def home_page():
+    global selected_songs
+    selected_songs = []
     return jsonify({"message": "Welcome to the Spotify recommendation system!"})
     #return send_from_directory(app.static_folder,'home.html')
 
@@ -320,8 +390,6 @@ def create_spotify_oauth():
                          redirect_uri= url_for('redirect_page', _external = True) ,
                          scope='user-library-read playlist-modify-public playlist-modify-private playlist-read-private')
                            #cache_handler=CacheFileHandler(cache_path=".cache"))
-
-selected_songs = []
 
 @app.route('/search', methods=['GET'])
 def search_songs():
