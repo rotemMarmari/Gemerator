@@ -62,7 +62,7 @@ const SongCard = ({ song, playlistId }) => {
           </Typography>
         </Content>
         <Controls>
-        {song.preview_url ? (
+        {(song.preview_url != "pna") ? (
             <audio controls>
               <source src={song.preview_url} type="audio/mpeg" />
               Your browser does not support the audio element.
