@@ -30,7 +30,7 @@ const VirtualizedPlaylists = ({ handleSavePlaylist }) => {
   };
 
   return (
-    <Box sx={{ width: '100%', height: 400, maxWidth: 360, bgcolor: '#810CA8' }}>
+    <Box sx={{ width: '100%', height: 400, maxWidth: 360, bgcolor: '#FFE55E', color:'#290A50'}}>
       <FixedSizeList
         height={400}
         width={360}

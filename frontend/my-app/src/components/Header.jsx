@@ -7,7 +7,7 @@ const Header = ({userInfo}) => {
     <header>
       <div className="left-header">
         <img className='head-logo' src={logo} alt="Logo"/>
-        <h1>Gemerator</h1>
+        <h1>GEMERATOR</h1>
       </div>
       <div className="right-header">
        {userInfo?.name && (<div className ="user-header">

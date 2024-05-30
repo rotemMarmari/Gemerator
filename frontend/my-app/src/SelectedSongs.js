@@ -1,6 +1,7 @@
 import React from 'react';
 import './App.css';  
 import './SelectedSongs.css'; 
+import RemoveCircleOutlineIcon from '@mui/icons-material/RemoveCircleOutline';
 
 const SelectedSongs = ({ selectedSongs, onSongRemove, onRecommend }) => {
   return (
@@ -10,7 +11,10 @@ const SelectedSongs = ({ selectedSongs, onSongRemove, onRecommend }) => {
         {selectedSongs.map((song) => (
           <li key={song.id} className="selected-song-item">
             {song.name} - {song.artists} 
-            <button onClick={() => onSongRemove(song.id)} className="remove-button">-</button>
+            <RemoveCircleOutlineIcon 
+              onClick={() => onSongRemove(song.id)} 
+              className="remove-icon" 
+            />
           </li>
         ))}
       </ul>

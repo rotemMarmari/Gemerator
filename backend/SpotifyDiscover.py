@@ -38,7 +38,7 @@ selected_songs = []
 
 ###############################################################################################
 
-data_path = "data/final_dataset_with_urls.csv"
+data_path = "Data/final_dataset_with_urls.csv"
 
 data = pd.read_csv(data_path)
 # data = pd.read_feather(data_path)

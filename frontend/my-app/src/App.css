@@ -3,17 +3,20 @@
   padding: 0;
   box-sizing: border-box;
   font-family: 'CircularSp', 'CircularSp-Arab', 'CircularSp-Hebr', 'CircularSp-Cyrl', 'CircularSp-Grek', 'CircularSp-Deva', sans-serif;
+  font-family: "Barlow", sans-serif;
   font-weight: 700;
   font-style: normal;
 }
 
 body {
-  background-color: #290A50;
+  /* background-color: #290A50; */
+  background-image: url('./assets/background.jpg');
 }
 
 .App {
   text-align: center;
   background-color: #290A50;
+  background-image: url('./assets/background.jpg');
 }
 
 .head-logo{
@@ -26,6 +29,11 @@ body {
 .left-header{
   display: flex;
   gap: 0.3rem;
+}
+
+.left-header h1{
+  font-weight: 800;
+  color: #FFE55E;
 }
 
 .right-header{
@@ -51,6 +59,7 @@ body {
 
 .app-container {
   background-color: #290A50;
+  background-image: url('./assets/background.jpg');
   min-height: 100vh; /* Ensure the container takes up the full viewport height */
   display: flex;
   flex-direction: column; /* Stack the header and content vertically */
@@ -146,7 +155,6 @@ header {
   color: white;
   background-color: #57A6A1;
   font-size: 60px;
-  
 }
 
 .song-cards-container {

@@ -16,6 +16,10 @@
   justify-content: center;
   align-items: center;
   margin-top: 6rem;
+  /* background-color: #98ECFF; */
+  background-color: #0000009a;
+  color: #fff;
+  padding: 1.5rem;
 }
 
 .login-button {

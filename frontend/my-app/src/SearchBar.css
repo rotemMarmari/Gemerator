@@ -19,6 +19,7 @@
   padding: 10px;
   border: 1px solid #ccc;
   border-radius: 4px;
+  font-weight: 500  ;
 }
 
 .suggestions-container {
@@ -36,7 +37,9 @@
 .suggestion-item {
   padding: 10px;
   cursor: pointer;
-  font-size: 15px;
+  font-size: 14px;
+  text-align: left;
+  font-weight: 350;
 }
 
 .suggestion-item:hover {
@@ -56,6 +59,7 @@
   justify-content: space-between;
   align-items: center;
   padding: 5px 0;
+  font-weight: 500;
 }
 
 .remove-button {

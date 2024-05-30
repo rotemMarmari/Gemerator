@@ -9,6 +9,7 @@
 
   body {
     background-color: #290A50;
+    background-image: url('./assets/profile-background.jpg');
   }
 
 
@@ -16,6 +17,7 @@
     padding: 20px;
     justify-content: center;
     align-items: center;
+    background-image: url('./assets/profile-background.jpg');
   }
 
  .upper-section {
@@ -75,6 +77,11 @@
     font-weight: 700;
     margin-bottom: 20px;
     text-align: left;
+    text-shadow: 
+        -1px -1px 0 #290A50,  
+         1px -1px 0 #290A50,
+        -1px  1px 0 #290A50,
+         1px  1px 0 #290A50; /* Text shadow creating a black border */
 }
 
 .list-container {
