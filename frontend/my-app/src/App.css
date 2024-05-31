@@ -3,7 +3,6 @@
   padding: 0;
   box-sizing: border-box;
   font-family: 'CircularSp', 'CircularSp-Arab', 'CircularSp-Hebr', 'CircularSp-Cyrl', 'CircularSp-Grek', 'CircularSp-Deva', sans-serif;
-  font-family: "Barlow", sans-serif;
   font-weight: 700;
   font-style: normal;
 }
@@ -63,6 +62,7 @@ body {
   min-height: 100vh; /* Ensure the container takes up the full viewport height */
   display: flex;
   flex-direction: column; /* Stack the header and content vertically */
+  justify-content: space-between;
   color: #FFFFFF
 }
 
@@ -80,7 +80,6 @@ body {
   display: flex;
   justify-content: center;
   align-items: center;
-  height: 10rem;
 }
 
 header {

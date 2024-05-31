@@ -4,6 +4,10 @@
 
 .upper-container{
   display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 5rem;
+  margin-top: 5rem;
 }
 
 .login-button-container {
@@ -15,7 +19,7 @@
 .search-song-container{
   justify-content: center;
   align-items: center;
-  margin-top: 6rem;
+  /* margin-top: 6rem; */
   /* background-color: #98ECFF; */
   background-color: #0000009a;
   color: #fff;
@@ -58,7 +62,6 @@
 
 .home-greeting {
   color: #F3CA52;
-  margin: 4rem;
   max-width: 530px;
 }
 

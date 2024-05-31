@@ -1,17 +1,15 @@
 .main-container {
-  flex: 1; /* This will make .main-container take up the remaining space */
   display: flex;
-  justify-content: flex-start;
-  align-items: flex-start;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
   padding: 2px; 
-  margin-top: 20px;
+  margin-top: 1rem;
+  gap: 1rem
 }
 
 .search-bar-container {
-  position: relative;
-  width: 21rem;
-  margin-right: 50px;
-  padding-right: 20px;
+  width: 100%;
 }
 
 .search-input {
@@ -30,7 +28,7 @@
   border-radius: 4px;
   max-height: 180px;
   overflow-y: auto;
-  width: 100%;
+  width: 400px;
   z-index: 1000;
 }
 

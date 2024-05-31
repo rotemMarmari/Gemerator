@@ -6,11 +6,12 @@ import VirtualizedPlaylists from './VirtualizedPlaylists';
 import FormGroup from '@mui/material/FormGroup';
 import FormControlLabel from '@mui/material/FormControlLabel';
 import Checkbox from '@mui/material/Checkbox';
-import { ClipLoader } from 'react-spinners'; // Import the spinner
+import { ClipLoader } from 'react-spinners'; 
 import Button from '@mui/material/Button';
-import Box from '@mui/material/Box'; // Import Box from MUI
-import Rating from '@mui/material/Rating'; // Import Rating from MUI
-import Typography from '@mui/material/Typography'; // Import Typography from MUI
+import Box from '@mui/material/Box'; 
+import Rating from '@mui/material/Rating'; 
+import Typography from '@mui/material/Typography'; 
+import Loader from './components/Loader';
 
 const PLAYLIST_AMOUNT = 10;
 let refreshIndex = 0;
@@ -23,7 +24,7 @@ const Profile = ({ userInfo, userPlaylists, onLogout }) => {
   const [playlistId, setPlaylistId] = useState(null);
   const [loading, setLoading] = useState(false); // State to manage loading spinner
   const [savedSong, setSavedSong] = useState(null); // State to manage the saved song
-  const UseHistory = { inputProps: { 'aria-label': 'Checkbox demo' } };
+  const [useHistory, setUseHistory] = useState(true); // State for useHistory checkbox
   const [ratingValue, setRatingValue] = useState(0); // State to manage the rating
 
   useEffect(() => {
@@ -70,7 +71,16 @@ const Profile = ({ userInfo, userPlaylists, onLogout }) => {
     console.log('Selected song:', song);
   };
 
+  const handleCheckboxChange = (event) => {
+    setUseHistory(event.target.checked);
+  };
+
   return (
+    !userInfo ? (
+      <div className="spinner-container">
+        <Loader />
+      </div>
+    ) : (
     <div className='profile-app'>
       <div className='upper-section'>
         <div className='greeting'>
@@ -82,7 +92,10 @@ const Profile = ({ userInfo, userPlaylists, onLogout }) => {
         <div className="list-container">
           <h3>Your Playlists</h3>
           <FormGroup>
-            <FormControlLabel control={<Checkbox defaultChecked />} label="Use listening history" />
+            <FormControlLabel 
+              control={<Checkbox checked={useHistory} onChange={handleCheckboxChange} />} 
+              label="Use listening history" 
+            />
           </FormGroup>
           <VirtualizedPlaylists handleSavePlaylist={handleSavePlaylist} />
         </div>
@@ -90,8 +103,8 @@ const Profile = ({ userInfo, userPlaylists, onLogout }) => {
       </div>
       {loading ? (
         <div className="spinner-container">
-          <ClipLoader size={50} color={"#123abc"} loading={loading} />
-        </div>
+          <Loader />
+      </div>
       ) : (
         recommendedPlaylist.length > 0 && (
           <div className='recommendations'>
@@ -123,7 +136,7 @@ const Profile = ({ userInfo, userPlaylists, onLogout }) => {
           </div>
         )
       )}
-    </div>
+    </div>)
   );
 };
 

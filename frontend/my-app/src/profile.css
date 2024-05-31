@@ -22,15 +22,15 @@
 
  .upper-section {
     display: flex;
-    padding: 10px;
-    margin: 20px;
+    justify-content: space-between;
+    padding: 2rem 5rem;
+    align-items: center;
   }
 
   .greeting{
     display: flex;
     flex-direction: column;
     color: #F3CA52;
-    padding: 5rem;
     width: 34rem;
   }
 
@@ -63,6 +63,7 @@
     height: 200px;
     width: 200px;
     border-radius: 40px;
+    border-color: #290A50;
   }
 
 .profile-app h1 {
@@ -70,6 +71,11 @@
     font-weight: 700;
     margin-bottom: 20px;
     text-align: left;
+    text-shadow: 
+        -1px -1px 0 #290A50,  
+         1px -1px 0 #290A50,
+        -1px  1px 0 #290A50,
+         1px  1px 0 #290A50;
 }
 
 .profile-app h2 {
@@ -81,13 +87,17 @@
         -1px -1px 0 #290A50,  
          1px -1px 0 #290A50,
         -1px  1px 0 #290A50,
-         1px  1px 0 #290A50; /* Text shadow creating a black border */
+         1px  1px 0 #290A50; 
 }
 
 .list-container {
     justify-content: center;
     position: center;
     justify-content: center;
+    background-color: #0000009a;
+    border-radius: 5px;
+    padding: 0.8rem;
+    width: 35rem;
   }
 
   .list-container h3{
