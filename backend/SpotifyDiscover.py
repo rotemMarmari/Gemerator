@@ -8,7 +8,6 @@ import random
 import joblib
 import threading
 
-
 from flask import Flask, request, url_for, session, redirect, render_template, send_from_directory, jsonify
 from flask_cors import CORS
 
@@ -31,6 +30,7 @@ TOKEN_INFO    = 'token_info'
 CLIENT_ID     = '11b6d46776d545af9be0a471e6ba9e56'
 CLIENT_SECRET = '128ce551f20e4d6e88e6f83f8766655a'
 REDIRECT_URI  = 'http://localhost:5000'
+SCOPE         = 'user-read-recently-played user-library-read playlist-modify-public playlist-modify-private playlist-read-private'
 
 use_history = False
 history_list = []
@@ -38,7 +38,7 @@ selected_songs = []
 
 ###############################################################################################
 
-data_path = "Data/final_dataset_with_urls.csv"
+data_path = "data/final_dataset_with_urls.csv"
 
 data = pd.read_csv(data_path)
 # data = pd.read_feather(data_path)
@@ -84,7 +84,6 @@ def add_song_to_dataset(song_df):
     data_save_thread = threading.Thread(target=add_row_to_data, args=(song_df,))
     data_save_thread.start()
 
-
 def find_song(track_id):
     song_data = defaultdict()
     results = sp.track(track_id)
@@ -117,26 +116,32 @@ def find_song(track_id):
 
 def get_preview_and_album_cover(playlist, data):
     uri_list = []
+    song_list = []
+
     for song in playlist:
-        # song_data = data[(data['id'] == song['id'])].iloc[0]        
         if song['album_cover_url'] == "acna":
+            song_list.append(song)
             uri_list.append(song['id'])
-     
+
     if uri_list:
         track_infos = sp.tracks(uri_list)['tracks']
-        for i, song_info in enumerate(playlist):
-            track_info = track_infos[i]
-            album_cover_url = track_info['album']['images'][0]['url'] if track_info['album']['images'] else None
-            preview_url = track_info['preview_url'] if track_info['preview_url'] else "pna"
+        track_info_map = {track['id']: track for track in track_infos}
 
-            # Update the playlist
-            if album_cover_url:
+        for song_info in song_list:
+            song_id = song_info['id']
+            track_info = track_info_map.get(song_id)
+
+            if track_info:
+                album_cover_url = track_info['album']['images'][0]['url'] if track_info['album']['images'] else "acna"
+                preview_url = track_info['preview_url'] if track_info['preview_url'] else "pna"
+                
+                # Update the playlist
                 song_info['album_cover_url'] = album_cover_url
-            song_info['preview_url'] = preview_url
+                song_info['preview_url'] = preview_url
 
-            # Update the dataset
-            data.loc[data['id'] == song_info['id'], 'album_cover_url'] = album_cover_url
-            data.loc[data['id'] == song_info['id'], 'preview_url'] = preview_url
+                # Update the dataset
+                data.loc[data['id'] == song_info['id'], 'album_cover_url'] = album_cover_url
+                data.loc[data['id'] == song_info['id'], 'preview_url'] = preview_url
 
 def get_song_data(song, spotify_data):
     # try to find the song in the dataset
@@ -259,7 +264,7 @@ def fetch_saved_tracks():
 
 ###############################################################################################
 
-@app.route('/')
+@app.route('/', methods=['POST'])
 def home_page():
     global selected_songs
     selected_songs = []
@@ -362,14 +367,16 @@ def logout():
             return jsonify({"message": "Logged out successfully and cache cleared"})
     return jsonify({"message": "Logged out successfully but no cache file found"})
 
-######## create route ########
-def toggle_history():
-    use_history = not use_history
+@app.route('/history/<useHistory>', methods=['POST'])
+def toggle_history(useHistory):
+    use_history = useHistory
+    print(use_history)
     if use_history:
         results = sp.current_user_recently_played()
         for item in results['items']:
             song = {'id': item['track']['id']}  
             history_list.append(song)
+    return jsonify({"message": "history toggled"})
 
 def get_token():
     token_info = session.get(TOKEN_INFO, None)
@@ -388,7 +395,7 @@ def get_token():
 def create_spotify_oauth():
     return SpotifyOAuth(client_id = CLIENT_ID, client_secret = CLIENT_SECRET,
                          redirect_uri= url_for('redirect_page', _external = True) ,
-                         scope='user-library-read playlist-modify-public playlist-modify-private playlist-read-private')
+                         scope=SCOPE)
                            #cache_handler=CacheFileHandler(cache_path=".cache"))
 
 @app.route('/search', methods=['GET'])

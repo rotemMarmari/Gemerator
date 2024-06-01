@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { getProfile, savePlaylist, logout, login } from './api';
+import { getProfile, savePlaylist, logout, login, toggleHistory } from './api';
 import './profile.css';
 import SongCard from './components/SongCard';
 import VirtualizedPlaylists from './VirtualizedPlaylists'; 
@@ -24,7 +24,7 @@ const Profile = ({ userInfo, userPlaylists, onLogout }) => {
   const [playlistId, setPlaylistId] = useState(null);
   const [loading, setLoading] = useState(false); // State to manage loading spinner
   const [savedSong, setSavedSong] = useState(null); // State to manage the saved song
-  const [useHistory, setUseHistory] = useState(true); // State for useHistory checkbox
+  const [useHistory, setUseHistory] = useState(false); // State for useHistory checkbox
   const [ratingValue, setRatingValue] = useState(0); // State to manage the rating
 
   useEffect(() => {
@@ -74,6 +74,11 @@ const Profile = ({ userInfo, userPlaylists, onLogout }) => {
   const handleCheckboxChange = (event) => {
     setUseHistory(event.target.checked);
   };
+
+  useEffect(() => {
+    console.log(useHistory);
+    toggleHistory(useHistory);
+  }, [useHistory])
 
   return (
     !userInfo ? (
