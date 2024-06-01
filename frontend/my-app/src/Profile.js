@@ -6,7 +6,6 @@ import VirtualizedPlaylists from './VirtualizedPlaylists';
 import FormGroup from '@mui/material/FormGroup';
 import FormControlLabel from '@mui/material/FormControlLabel';
 import Checkbox from '@mui/material/Checkbox';
-import { ClipLoader } from 'react-spinners'; 
 import Button from '@mui/material/Button';
 import Box from '@mui/material/Box'; 
 import Rating from '@mui/material/Rating'; 

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { styled, useTheme } from '@mui/material/styles';
 import Card from '@mui/material/Card';
 import CardContent from '@mui/material/CardContent';
@@ -8,6 +8,7 @@ import Typography from '@mui/material/Typography';
 import AddIcon from '@mui/icons-material/Add';
 import { addPlaylist } from '../api';
 import '../App.css';
+import Popup from './Popup';
 
 const Root = styled(Card)(({ theme }) => ({
   display: 'flex',
@@ -40,13 +41,24 @@ const Controls = styled('div')(({ theme }) => ({
 
 
 const SongCard = ({ song, playlistId }) => {
-  const [isAdded, setIsAdded] = useState(false); 
+  //const [isAdded, setIsAdded] = useState(false); 
+  const [showPopup, setShowPopup] = useState(false);
+  const addButtonRef = useRef(null);
 
   const handleAddClick = () => {
-    if (!isAdded) { 
-      addPlaylist(playlistId, song.id);
-      setIsAdded(true); 
-    }
+    // if (!isAdded) { 
+    //   addPlaylist(playlistId, song.id);
+    //   setIsAdded(true);
+    //   setShowPopup(true);
+    //   setTimeout(() => {
+    //     setShowPopup(false);
+    //   }, 2000); 
+    // }
+    addPlaylist(playlistId, song.id);
+    setShowPopup(true);
+      setTimeout(() => {
+        setShowPopup(false);
+      }, 2000); 
   };
 
   
@@ -72,7 +84,7 @@ const SongCard = ({ song, playlistId }) => {
               Preview not available
             </Typography>
           )}
-          <IconButton aria-label="add" onClick={handleAddClick}>
+          <IconButton aria-label="add" onClick={handleAddClick} ref={addButtonRef}>
             <AddIcon />
           </IconButton>
         </Controls>
@@ -80,6 +92,7 @@ const SongCard = ({ song, playlistId }) => {
       <Cover
         image={song.album_cover_url} 
       />
+      {showPopup && <Popup anchorEl={addButtonRef.current} />} {/* Adjust anchorEl as needed */}
     </Root>
   );
 };

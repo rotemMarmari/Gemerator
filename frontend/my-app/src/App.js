@@ -100,35 +100,45 @@ const App = () => {
             recommendedPlaylist.length > 0 && (
             <div className='recommendations'>
               <h2>Recommended Songs</h2>
-              <Button variant="contained" color="primary" onClick={handleRefresh}>
-                Refresh songs
-              </Button>
               <Box sx={{ '& > legend': { mt: 2 } }}>
-                <Typography component="legend">Rate the playlists</Typography>
-                <Rating
-                  name="playlist-rating"
-                  value={ratingValue}
-                  onChange={(event, newValue) => {
-                    setRatingValue(newValue);
-                    
-                  }}
+                  <Typography component="legend" 
                   sx={{
-                    '& .MuiRating-iconEmpty': {
-                      color: 'rgba(255, 255, 255, 0.8)', // White color for empty star borders
-                    }
+                    textShadow: `
+                      -1px -1px 0 #290A50,  
+                      1px -1px 0 #290A50,
+                      -1px  1px 0 #290A50,
+                      1px  1px 0 #290A50
+                    `
                   }}
-                />
-              </Box>
+                  >
+                    Rate the playlists
+                    </Typography>
+                  <Rating
+                    name="playlist-rating"
+                    value={ratingValue}
+                    onChange={(event, newValue) => {
+                      setRatingValue(newValue);
+                      
+                    }}
+                    sx={{
+                      '& .MuiRating-iconEmpty': {
+                        color: '#F3CA52', // White color for empty star borders
+                      }
+                    }}
+                  />
+                </Box>
               <div className="song-cards-container">
                 {recommendedPlaylist.map(song => (
                   <SongCard key={song.id} song={song} playlistId={playlistId} />
                 ))}
               </div>
+                <Button variant="contained" color="primary" onClick={handleRefresh}>
+                  Refresh songs
+                </Button>
             </div>
           )
           ) }
       </div>
-
       ) : (
         <Profile 
           userInfo={userInfo}
