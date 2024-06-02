@@ -7,7 +7,7 @@ import IconButton from '@mui/material/IconButton';
 import Typography from '@mui/material/Typography';
 import AddIcon from '@mui/icons-material/Add';
 import FavoriteIcon from '@mui/icons-material/Favorite';
-import { addPlaylist } from '../api';
+import { addToPlaylist, updateStats } from '../api';
 import '../App.css';
 import Popup from './Popup';
 
@@ -41,7 +41,7 @@ const Controls = styled('div')(({ theme }) => ({
 }));
 
 
-const SongCard = ({ song, playlistId, iconType }) => {
+const SongCard = ({ user_id, song, playlistId, iconType }) => {
   //const [isAdded, setIsAdded] = useState(false); 
   const [isHeartPressed, setIsHeartPressed] = useState(false);
   const [showPopup, setShowPopup] = useState(false);
@@ -49,16 +49,8 @@ const SongCard = ({ song, playlistId, iconType }) => {
   const [popupMessage, setPopupMessage] = useState('');
 
   const handleAddClick = async () => {
-    // if (!isAdded) { 
-    //   addPlaylist(playlistId, song.id);
-    //   setIsAdded(true);
-    //   setShowPopup(true);
-    //   setTimeout(() => {
-    //     setShowPopup(false);
-    //   }, 2000); 
-    // }
     try {
-      const response = await addPlaylist(playlistId, song.id);
+      const response = await addToPlaylist(playlistId, song.id);
       if (response.data.error) {
         setPopupMessage(response.data.error);
       } else {
@@ -71,10 +63,12 @@ const SongCard = ({ song, playlistId, iconType }) => {
       setTimeout(() => {
         setShowPopup(false);
       }, 2000); 
+    updateStats(user_id, 'save');
   };
 
   const handleHeartClick = () => {
     setIsHeartPressed(prevState => !prevState);
+    updateStats(user_id, isHeartPressed ? 'dislike' : 'like'); 
   };
 
   

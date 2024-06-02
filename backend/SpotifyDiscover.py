@@ -286,9 +286,12 @@ def redirect_page():
     session[TOKEN_INFO] = token_info
     
     sp = spotipy.Spotify(auth=token_info['access_token'])
+    current_user = sp.current_user()
+    print(current_user)
     user_info = {
-        'name': sp.current_user()['display_name'],
-        'image': sp.current_user()['images'][1]['url']
+        'id' : current_user['id'],
+        'name': current_user['display_name'],
+        'image': current_user['images'][1]['url']
     }
     user_playlists = sp.current_user_playlists()['items']
     # Fetch user's saved tracks
@@ -443,5 +446,60 @@ def recommend():
     playlists = create_recommended_playlists(selected_songs, data, song_cluster_pipeline, n_songs=210, n_playlists=10)
     
     return jsonify(playlists)
+
+import csv
+from datetime import datetime
+
+csv_file_path = "data/recommendation_stats.csv"
+headers = ['user_id', 'total_recommended', 'songs_liked', 'songs_saved', 'total_rating', 'num_ratings', 'last_updated', ]
+
+@app.route('/update_stats/<user_id>/<action>', methods=['POST'])
+def update_csv(user_id, action, rating=None):
+    updated = False
+    now = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+    rows = []
+
+    rating = request.args.get('rating', default=None, type=int)
+
+    with open(csv_file_path, 'r', newline='') as file:
+        reader = csv.DictReader(file)
+        for row in reader:
+            if row['user_id'] == user_id:
+                if action == 'recommend':
+                    row['total_recommended'] = int(row['total_recommended']) + 1
+                elif action == 'like':
+                    row['songs_liked'] = int(row['songs_liked']) + 1
+                elif action == 'dislike':
+                    row['songs_liked'] = int(row['songs_liked']) - 1
+                elif action == 'save':
+                    row['songs_saved'] = int(row['songs_saved']) + 1
+                elif action == 'rate' and rating is not None:
+                    row['total_rating'] = int(row['total_rating']) + rating
+                    row['num_ratings'] = int(row['num_ratings']) + 1
+                elif action == 'cancel_rate':
+                    row['total_rating'] = int(row['total_rating']) - rating
+                    row['num_ratings'] = int(row['num_ratings']) - 1
+                row['last_updated'] = now
+                updated = True
+            rows.append(row)
+
+    if not updated:
+        new_row = {
+            'user_id': user_id,
+            'total_recommended': 210,
+            'songs_liked': 1 if action == 'like' else 0,
+            'songs_saved': 1 if action == 'save' else 0,
+            'total_rating': rating if action == 'rate' and rating is not None else 0,
+            'num_ratings': 1 if action == 'rate' and rating is not None else 0,
+            'last_updated': now
+        }
+        rows.append(new_row)
+
+    with open(csv_file_path, 'w', newline='') as file:
+        writer = csv.DictWriter(file, fieldnames=headers)
+        writer.writeheader()
+        writer.writerows(rows)
+
+    return jsonify({'status': 'success'})
 
 app.run(debug=True, port=5000)

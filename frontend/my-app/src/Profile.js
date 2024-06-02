@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { getProfile, savePlaylist, logout, login, toggleHistory } from './api';
+import { getProfile, savePlaylist, logout, login, toggleHistory, updateStats } from './api';
 import './profile.css';
 import SongCard from './components/SongCard';
 import VirtualizedPlaylists from './VirtualizedPlaylists'; 
@@ -134,7 +134,7 @@ const Profile = ({ userInfo, userPlaylists, onLogout }) => {
               </Box>
             <div className="song-cards-container">
               {recommendedPlaylist.map(song => (
-                <SongCard key={song.id} song={song} playlistId={playlistId} iconType="add"/>
+                <SongCard key={song.id} user_id={userInfo.id} song={song} playlistId={playlistId} iconType="add"/>
               ))}
             </div>
             <Button variant="contained" color="primary" onClick={handleRefresh}>

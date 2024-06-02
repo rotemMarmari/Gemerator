@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { getProfile, savePlaylist, logout, login } from './api';
+import { getProfile, savePlaylist, logout, login, updateStats } from './api';
 import './App.css';
 import Home from './Home';
 import Header from './components/Header';
@@ -26,6 +26,7 @@ const App = () => {
   const [loading, setLoading] = useState(false); // State to manage loading spinner
   const [savedSong, setSavedSong] = useState(null); // State to manage the saved song
   const [ratingValue, setRatingValue] = useState(0); // State to manage the rating
+  const [ratingLocked, setRatingLocked] = useState(false); // State to manage whether rating is locked or not
 
   useEffect(() => {
     if (isAuthenticated) {
@@ -84,6 +85,24 @@ const App = () => {
     setLoading(false); 
   };
 
+  const handleRatingChange = (newValue) => {
+    if (!ratingLocked) {
+      setRatingValue(newValue);
+    }
+  };
+
+  const handleLockRating = (rating) => {
+    setRatingLocked(true);
+    updateStats("Guest", 'rate', rating); 
+  };
+
+  const handleResetRating = (rating) => {
+    updateStats("Guest", 'cancel_rate', rating); 
+    setRatingValue(0);
+    setRatingLocked(false);
+  };
+
+
   const UseHistory = { inputProps: { 'aria-label': 'Checkbox demo' } };
 
   return (
@@ -119,20 +138,35 @@ const App = () => {
                   <Rating
                     name="playlist-rating"
                     value={ratingValue}
-                    onChange={(event, newValue) => {
-                      setRatingValue(newValue);
-                      
-                    }}
+                    // onChange={(event, newValue) => {setRatingValue(newValue);}}
+                    onChange={(event, newValue) => handleRatingChange(newValue)}
                     sx={{
+                      '& .MuiRating-icon': {
+                        fontSize: '2rem', // Default size
+                      },
+                      '& .MuiRating-iconHover': {
+                        fontSize: '2.1rem', // Size when hovering
+                      },
                       '& .MuiRating-iconEmpty': {
                         color: '#F3CA52', 
                       }
                     }}
+                    disabled={ratingLocked}
                   />
+                  {!ratingLocked && ratingValue != 0 && (
+                  <Button variant="contained" color="primary" onClick={() => handleLockRating(ratingValue)}>
+                    Lock Rating
+                  </Button>
+                )}
+                {ratingLocked && (
+                  <Button variant="contained" color="secondary" onClick={() => handleResetRating(ratingValue)}>
+                    Reset Rating
+                  </Button>
+                )}
                 </Box>
               <div className="song-cards-container">
                 {recommendedPlaylist.map(song => (
-                  <SongCard key={song.id} song={song} playlistId={playlistId} iconType="favorite" />
+                  <SongCard key={song.id} user_id={"Guest"} song={song} playlistId={playlistId} iconType="favorite" />
                 ))}
               </div>
                 <Button variant="contained" color="primary" onClick={handleRefresh}>
