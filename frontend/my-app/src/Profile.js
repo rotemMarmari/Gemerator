@@ -11,6 +11,7 @@ import Box from '@mui/material/Box';
 import Rating from '@mui/material/Rating'; 
 import Typography from '@mui/material/Typography'; 
 import Loader from './components/Loader';
+import MusicPlayer from './components/MusicPlayer';
 
 const PLAYLIST_AMOUNT = 10;
 let refreshIndex = 0;
@@ -113,6 +114,7 @@ const Profile = ({ userInfo, userPlaylists, onLogout }) => {
         recommendedPlaylist.length > 0 && (
           <div className='recommendations'>
             <h2>Recommended Songs</h2>
+            <div className='recommendations-controller'> 
             <Button variant="contained" color="primary" onClick={handleRefresh}>
               Refresh songs
             </Button>
@@ -132,14 +134,18 @@ const Profile = ({ userInfo, userPlaylists, onLogout }) => {
                   }}
                 />
               </Box>
+              </div>
             <div className="song-cards-container">
               {recommendedPlaylist.map(song => (
-                <SongCard key={song.id} song={song} playlistId={playlistId} iconType="add"/>
+                // <SongCard key={song.id} song={song} playlistId={playlistId} iconType="add"/>
+                <MusicPlayer key={song.id} song={song} playlistId={playlistId} iconType="add"/>
               ))}
             </div>
+            <div className='recommendations-controller'> 
             <Button variant="contained" color="primary" onClick={handleRefresh}>
               Refresh songs
             </Button>
+            </div>
           </div>
         )
       )}

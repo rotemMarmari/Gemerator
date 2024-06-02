@@ -43,6 +43,7 @@ const Controls = styled('div')(({ theme }) => ({
 
 const SongCard = ({ song, playlistId, iconType }) => {
   //const [isAdded, setIsAdded] = useState(false); 
+  
   const [isHeartPressed, setIsHeartPressed] = useState(false);
   const [showPopup, setShowPopup] = useState(false);
   const addButtonRef = useRef(null);
