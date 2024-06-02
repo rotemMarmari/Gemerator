@@ -6,6 +6,7 @@ import CardMedia from '@mui/material/CardMedia';
 import IconButton from '@mui/material/IconButton';
 import Typography from '@mui/material/Typography';
 import AddIcon from '@mui/icons-material/Add';
+import FavoriteIcon from '@mui/icons-material/Favorite';
 import { addPlaylist } from '../api';
 import '../App.css';
 import Popup from './Popup';
@@ -40,12 +41,14 @@ const Controls = styled('div')(({ theme }) => ({
 }));
 
 
-const SongCard = ({ song, playlistId }) => {
+const SongCard = ({ song, playlistId, iconType }) => {
   //const [isAdded, setIsAdded] = useState(false); 
+  const [isHeartPressed, setIsHeartPressed] = useState(false);
   const [showPopup, setShowPopup] = useState(false);
   const addButtonRef = useRef(null);
+  const [popupMessage, setPopupMessage] = useState('');
 
-  const handleAddClick = () => {
+  const handleAddClick = async () => {
     // if (!isAdded) { 
     //   addPlaylist(playlistId, song.id);
     //   setIsAdded(true);
@@ -54,11 +57,24 @@ const SongCard = ({ song, playlistId }) => {
     //     setShowPopup(false);
     //   }, 2000); 
     // }
-    addPlaylist(playlistId, song.id);
+    try {
+      const response = await addPlaylist(playlistId, song.id);
+      if (response.data.error) {
+        setPopupMessage(response.data.error);
+      } else {
+        setPopupMessage(response.data.message || 'Song added to playlist');
+      }
+    } catch (error) {
+      setPopupMessage('An error occurred');
+    }
     setShowPopup(true);
       setTimeout(() => {
         setShowPopup(false);
       }, 2000); 
+  };
+
+  const handleHeartClick = () => {
+    setIsHeartPressed(prevState => !prevState);
   };
 
   
@@ -84,15 +100,21 @@ const SongCard = ({ song, playlistId }) => {
               Preview not available
             </Typography>
           )}
-          <IconButton aria-label="add" onClick={handleAddClick} ref={addButtonRef}>
-            <AddIcon />
+          <IconButton
+            aria-label={iconType === 'add' ? 'add' : 'favorite'}
+            onClick={iconType === 'add' ? handleAddClick : handleHeartClick}
+            ref={addButtonRef}
+          >
+            {iconType === 'add' ? <AddIcon /> : (
+              <FavoriteIcon sx={{ color: isHeartPressed ? 'red' : 'default' }} />
+            )}
           </IconButton>
         </Controls>
       </Details>
       <Cover
         image={song.album_cover_url} 
       />
-      {showPopup && <Popup anchorEl={addButtonRef.current} />} {/* Adjust anchorEl as needed */}
+      {showPopup && <Popup anchorEl={addButtonRef.current} message={popupMessage}/>} {/* Adjust anchorEl as needed */}
     </Root>
   );
 };

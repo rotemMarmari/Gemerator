@@ -127,16 +127,19 @@ const Profile = ({ userInfo, userPlaylists, onLogout }) => {
                   }}
                   sx={{
                     '& .MuiRating-iconEmpty': {
-                      color: 'rgba(255, 255, 255, 0.8)', // White color for empty star borders
+                      color: '#F3CA52', // White color for empty star borders
                     }
                   }}
                 />
               </Box>
             <div className="song-cards-container">
               {recommendedPlaylist.map(song => (
-                <SongCard key={song.id} song={song} playlistId={playlistId} />
+                <SongCard key={song.id} song={song} playlistId={playlistId} iconType="add"/>
               ))}
             </div>
+            <Button variant="contained" color="primary" onClick={handleRefresh}>
+              Refresh songs
+            </Button>
           </div>
         )
       )}

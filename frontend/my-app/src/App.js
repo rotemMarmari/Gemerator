@@ -7,11 +7,11 @@ import SongCard from './components/SongCard';
 import Box from '@mui/material/Box'; // Import Box from MUI
 import Rating from '@mui/material/Rating'; // Import Rating from MUI
 import Typography from '@mui/material/Typography'; // Import Typography from MUI
-import { ClipLoader } from 'react-spinners'; // Import the spinner
 import Button from '@mui/material/Button';
 import SearchBar from './SearchBar'; // Import SearchBar
 import Profile from './Profile';
 import Footer from './components/Footer';
+import Loader from './components/Loader';
 
 const PLAYLIST_AMOUNT = 10;
 let refreshIndex = 0;
@@ -94,12 +94,15 @@ const App = () => {
           <Home onLogin={handleLogin} onSongSelect={handleRecommend}/>
           {loading ? (
             <div className="spinner-container">
-              <ClipLoader size={50} color={"#123abc"} loading={loading} />
+              <Loader />
             </div>
           ) : (
             recommendedPlaylist.length > 0 && (
             <div className='recommendations'>
               <h2>Recommended Songs</h2>
+              <Button variant="contained" color="primary" onClick={handleRefresh}>
+                  Refresh songs
+                </Button>
               <Box sx={{ '& > legend': { mt: 2 } }}>
                   <Typography component="legend" 
                   sx={{
@@ -122,14 +125,14 @@ const App = () => {
                     }}
                     sx={{
                       '& .MuiRating-iconEmpty': {
-                        color: '#F3CA52', // White color for empty star borders
+                        color: '#F3CA52', 
                       }
                     }}
                   />
                 </Box>
               <div className="song-cards-container">
                 {recommendedPlaylist.map(song => (
-                  <SongCard key={song.id} song={song} playlistId={playlistId} />
+                  <SongCard key={song.id} song={song} playlistId={playlistId} iconType="favorite" />
                 ))}
               </div>
                 <Button variant="contained" color="primary" onClick={handleRefresh}>

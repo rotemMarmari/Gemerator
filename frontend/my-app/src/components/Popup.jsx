@@ -2,13 +2,13 @@ import * as React from 'react';
 import { Unstable_Popup as BasePopup } from '@mui/base/Unstable_Popup';
 import { styled } from '@mui/system';
 
-export default function Popup({ anchorEl }) {
+export default function Popup({ anchorEl ,message }) {
   const open = Boolean(anchorEl);
   const id = open ? 'simple-popup' : undefined;
 
   return (
     <BasePopup id={id} open={open} anchor={anchorEl}>
-      <PopupBody>Song added to playlist</PopupBody>
+      <PopupBody>{message}</PopupBody>
     </BasePopup>
   );
 }
