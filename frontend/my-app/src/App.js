@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { getProfile, savePlaylist, logout, login } from './api';
+import { getProfile, savePlaylist, logout, login, updateStats } from './api';
 import './App.css';
 import Home from './Home';
 import Header from './components/Header';
@@ -26,6 +26,7 @@ const App = () => {
   const [loading, setLoading] = useState(false); // State to manage loading spinner
   const [savedSong, setSavedSong] = useState(null); // State to manage the saved song
   const [ratingValue, setRatingValue] = useState(0); // State to manage the rating
+  const [ratingLocked, setRatingLocked] = useState(false); // State to manage whether rating is locked or not
 
   useEffect(() => {
     if (isAuthenticated) {
@@ -42,6 +43,7 @@ const App = () => {
   const handleRefresh = () => {
     refreshIndex = (refreshIndex + 1) % PLAYLIST_AMOUNT;
     setRecommendedPlaylist(recPlaylists[refreshIndex]);
+    updateStats("Guest", 'recommend');
   }
 
   const handleLogin = () => {
@@ -68,7 +70,26 @@ const App = () => {
     recPlaylists = recommendedPlaylists;
     setRecommendedPlaylist(recPlaylists[refreshIndex]);
     setLoading(false); 
+    updateStats("Guest", 'recommend'); 
   };
+
+  const handleRatingChange = (newValue) => {
+    if (!ratingLocked) {
+      setRatingValue(newValue);
+    }
+  };
+
+  const handleLockRating = (rating) => {
+    setRatingLocked(true);
+    updateStats("Guest", 'rate', rating); 
+  };
+
+  const handleResetRating = (rating) => {
+    updateStats("Guest", 'cancel_rate', rating); 
+    setRatingValue(0);
+    setRatingLocked(false);
+  };
+
 
   const UseHistory = { inputProps: { 'aria-label': 'Checkbox demo' } };
 
@@ -87,37 +108,59 @@ const App = () => {
             <div className='recommendations'>
               <div className='recommendations-controller'> 
               <h2>Recommended Songs</h2>
-                <Button variant="contained" color="primary" onClick={handleRefresh}>
-                    Refresh songs
-                    <RefreshIcon />
+              <Button variant="contained" color="primary" onClick={handleRefresh}>
+                  Refresh songs
+                </Button>
+              <Box sx={{ '& > legend': { mt: 2 } }}>
+                  <Typography component="legend" 
+                  sx={{
+                    textShadow: `
+                      -1px -1px 0 #290A50,  
+                      1px -1px 0 #290A50,
+                      -1px  1px 0 #290A50,
+                      1px  1px 0 #290A50
+                    `
+                  }}
+                  >
+                    Rate the playlists
+                    </Typography>
+                  <Rating
+                    name="playlist-rating"
+                    value={ratingValue}
+                    // onChange={(event, newValue) => {setRatingValue(newValue);}}
+                    onChange={(event, newValue) => handleRatingChange(newValue)}
+                    sx={{
+                      '& .MuiRating-icon': {
+                        fontSize: '2rem', // Default size
+                      },
+                      '& .MuiRating-iconHover': {
+                        fontSize: '2.1rem', // Size when hovering
+                      },
+                      '& .MuiRating-iconEmpty': {
+                        color: '#F3CA52', 
+                      }
+                    }}
+                    disabled={ratingLocked}
+                  />
+                  {!ratingLocked && ratingValue != 0 && (
+                  <Button variant="contained" color="primary" onClick={() => handleLockRating(ratingValue)}>
+                    Lock Rating
                   </Button>
-                  <Box sx={{ '& > legend': { mt: 2 } }}>
-                      <Typography component="legend" 
-                      sx={{
-                        textShadow: `
-                          -1px -1px 0 #290A50,  
-                          1px -1px 0 #290A50,
-                          -1px  1px 0 #290A50,
-                          1px  1px 0 #290A50
-                        `
-                      }}
-                      >
-                        Rate the playlists
-                        </Typography>
-                      <Rating
-                        name="playlist-rating"
-                        value={ratingValue}
-                        onChange={(event, newValue) => {
-                          setRatingValue(newValue);
-                          
-                        }}
-                        sx={{
-                          '& .MuiRating-iconEmpty': {
-                            color: '#F3CA52', 
-                          }
-                        }}
-                      />
-                    </Box>
+                  )}
+                  {ratingLocked && (
+                    <Button variant="contained" color="secondary" onClick={() => handleResetRating(ratingValue)}>
+                      Reset Rating
+                    </Button>
+                  )}
+                </Box>
+//               <div className="song-cards-container">
+//                 {recommendedPlaylist.map(song => (
+//                   <SongCard key={song.id} user_id={"Guest"} song={song} playlistId={playlistId} iconType="favorite" />
+//                </div>                
+//                  <Button variant="contained" color="primary" onClick={handleRefresh}>
+//                     Refresh songs
+//                     <RefreshIcon />
+//                   </Button> 
                     </div>
               <div className="song-cards-container">
                 {recommendedPlaylist.map(song => (

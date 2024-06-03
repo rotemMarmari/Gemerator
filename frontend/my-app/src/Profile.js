@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { getProfile, savePlaylist, logout, login, toggleHistory } from './api';
+import { getProfile, savePlaylist, logout, login, toggleHistory, updateStats } from './api';
 import './profile.css';
 import SongCard from './components/SongCard';
 import VirtualizedPlaylists from './VirtualizedPlaylists'; 
@@ -26,6 +26,7 @@ const Profile = ({ userInfo, userPlaylists, onLogout }) => {
   const [savedSong, setSavedSong] = useState(null); // State to manage the saved song
   const [useHistory, setUseHistory] = useState(false); // State for useHistory checkbox
   const [ratingValue, setRatingValue] = useState(0); // State to manage the rating
+  const [ratingLocked, setRatingLocked] = useState(false); // State to manage whether rating is locked or not
 
   useEffect(() => {
     if (isAuthenticated) {
@@ -49,12 +50,14 @@ const Profile = ({ userInfo, userPlaylists, onLogout }) => {
       console.error('Error saving playlist:', error);
       setLoading(false); // Hide the spinner in case of error
     });
+    updateStats(userInfo.id, 'recommend'); 
   };
 
   
   const handleRefresh = () => {
     refreshIndex = (refreshIndex + 1) % PLAYLIST_AMOUNT;
     setRecommendedPlaylist(recPlaylists[refreshIndex]);
+    updateStats(userInfo.id, 'recommend');
   }
 
   const handleLogin = () => {
@@ -79,6 +82,23 @@ const Profile = ({ userInfo, userPlaylists, onLogout }) => {
     console.log(useHistory);
     toggleHistory(useHistory);
   }, [useHistory])
+
+  const handleRatingChange = (newValue) => {
+    if (!ratingLocked) {
+      setRatingValue(newValue);
+    }
+  };
+
+  const handleLockRating = (rating) => {
+    setRatingLocked(true);
+    updateStats(userInfo.id, 'rate', rating); 
+  };
+
+  const handleResetRating = (rating) => {
+    updateStats(userInfo.id, 'cancel_rate', rating); 
+    setRatingValue(0);
+    setRatingLocked(false);
+  };
 
   return (
     !userInfo ? (
@@ -121,19 +141,38 @@ const Profile = ({ userInfo, userPlaylists, onLogout }) => {
             <Box sx={{ '& > legend': { mt: 2 } }}>
                 <Typography component="legend">Rate the playlists</Typography>
                 <Rating
-                  name="playlist-rating"
-                  value={ratingValue}
-                  onChange={(event, newValue) => {
-                    setRatingValue(newValue);
-                    
-                  }}
-                  sx={{
-                    '& .MuiRating-iconEmpty': {
-                      color: '#F3CA52', // White color for empty star borders
-                    }
-                  }}
-                />
-              </Box>
+                    name="playlist-rating"
+                    value={ratingValue}
+                    // onChange={(event, newValue) => {setRatingValue(newValue);}}
+                    onChange={(event, newValue) => handleRatingChange(newValue)}
+                    sx={{
+                      '& .MuiRating-icon': {
+                        fontSize: '2rem', // Default size
+                      },
+                      '& .MuiRating-iconHover': {
+                        fontSize: '2.1rem', // Size when hovering
+                      },
+                      '& .MuiRating-iconEmpty': {
+                        color: '#F3CA52', 
+                      }
+                    }}
+                    disabled={ratingLocked}
+                  />
+                  {!ratingLocked && ratingValue != 0 && (
+                    <Button variant="contained" color="primary" onClick={() => handleLockRating(ratingValue)}>
+                      Lock Rating
+                    </Button>
+                  )}
+                  {ratingLocked && (
+                    <Button variant="contained" color="secondary" onClick={() => handleResetRating(ratingValue)}>
+                      Reset Rating
+                    </Button>
+                  )}
+                </Box>
+//             <div className="song-cards-container">
+//               {recommendedPlaylist.map(song => (
+//                 <SongCard key={song.id} user_id={userInfo.id} song={song} playlistId={playlistId} iconType="add"/>
+// 
               </div>
             <div className="song-cards-container">
               {recommendedPlaylist.map(song => (
