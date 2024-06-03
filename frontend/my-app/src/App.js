@@ -3,15 +3,15 @@ import { getProfile, savePlaylist, logout, login, updateStats } from './api';
 import './App.css';
 import Home from './Home';
 import Header from './components/Header';
-import SongCard from './components/SongCard';
-import Box from '@mui/material/Box'; // Import Box from MUI
-import Rating from '@mui/material/Rating'; // Import Rating from MUI
-import Typography from '@mui/material/Typography'; // Import Typography from MUI
+import RefreshIcon from '@mui/icons-material/Refresh';
+import Box from '@mui/material/Box'; 
+import Rating from '@mui/material/Rating'; 
+import Typography from '@mui/material/Typography'; 
 import Button from '@mui/material/Button';
-import SearchBar from './SearchBar'; // Import SearchBar
 import Profile from './Profile';
 import Footer from './components/Footer';
 import Loader from './components/Loader';
+import MusicPlayer from './components/MusicPlayer';
 
 const PLAYLIST_AMOUNT = 10;
 let refreshIndex = 0;
@@ -38,20 +38,6 @@ const App = () => {
       });
     }
   }, [isAuthenticated]);
-
-  const handleSavePlaylist = (playlistId) => {
-    setPlaylistId(playlistId);
-    setLoading(true); // Show the spinner
-    savePlaylist(playlistId).then(response => {
-      // refreshIndex = 0;
-      recPlaylists = response.data;
-      setRecommendedPlaylist(recPlaylists[refreshIndex]);
-      setLoading(false); // Hide the spinner
-    }).catch(error => {
-      console.error('Error saving playlist:', error);
-      setLoading(false); // Hide the spinner in case of error
-    });
-  };
 
   
   const handleRefresh = () => {
@@ -120,6 +106,7 @@ const App = () => {
           ) : (
             recommendedPlaylist.length > 0 && (
             <div className='recommendations'>
+              <div className='recommendations-controller'> 
               <h2>Recommended Songs</h2>
               <Button variant="contained" color="primary" onClick={handleRefresh}>
                   Refresh songs
@@ -166,14 +153,27 @@ const App = () => {
                     </Button>
                   )}
                 </Box>
+//               <div className="song-cards-container">
+//                 {recommendedPlaylist.map(song => (
+//                   <SongCard key={song.id} user_id={"Guest"} song={song} playlistId={playlistId} iconType="favorite" />
+//                </div>                
+//                  <Button variant="contained" color="primary" onClick={handleRefresh}>
+//                     Refresh songs
+//                     <RefreshIcon />
+//                   </Button> 
+                    </div>
               <div className="song-cards-container">
                 {recommendedPlaylist.map(song => (
-                  <SongCard key={song.id} user_id={"Guest"} song={song} playlistId={playlistId} iconType="favorite" />
+                  // <SongCard key={song.id} song={song} playlistId={playlistId} iconType="favorite" />
+                  <MusicPlayer key={song.id} song={song} playlistId={playlistId} iconType="favorite"/>
                 ))}
               </div>
+              <div className='recommendations-controller'> 
                 <Button variant="contained" color="primary" onClick={handleRefresh}>
                   Refresh songs
+                  <RefreshIcon />
                 </Button>
+                </div>
             </div>
           )
           ) }

@@ -7,6 +7,7 @@ const SearchBar = ({ onSongSelect }) => {
   const [query, setQuery] = useState('');
   const [suggestions, setSuggestions] = useState([]);
   const [selectedSongs, setSelectedSongs] = useState([]);
+  const [loading, setLoading] = useState(false); // Loading state
 
   const handleSearch = async (e) => {
     const value = e.target.value;
@@ -47,11 +48,14 @@ const SearchBar = ({ onSongSelect }) => {
   };
 
   const handleRecommend = async () => {
+    setLoading(true); // Show the spinner
     try {
       const response = await axios.post('http://localhost:5000/recommend');
       onSongSelect(response.data);
     } catch (error) {
       console.error('Error recommending songs:', error);
+    } finally {
+      setLoading(false); // Hide the spinner
     }
   };
 
@@ -83,6 +87,7 @@ const SearchBar = ({ onSongSelect }) => {
         selectedSongs={selectedSongs}
         onSongRemove={handleSongRemove}
         onRecommend={handleRecommend}
+        loading={loading}
       />
     </div>
   );

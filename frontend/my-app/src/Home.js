@@ -36,7 +36,6 @@ const Home = ({ onLogin, onSongSelect}) => {
         </div>
       </div>
       
-      
     </div>
   );
 };
