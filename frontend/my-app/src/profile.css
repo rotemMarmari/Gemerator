@@ -114,3 +114,7 @@
     justify-content: center;
     align-items: center;
   }
+
+  .initial{
+    height: 70vh;
+  }

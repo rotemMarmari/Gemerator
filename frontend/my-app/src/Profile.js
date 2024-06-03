@@ -82,7 +82,7 @@ const Profile = ({ userInfo, userPlaylists, onLogout }) => {
 
   return (
     !userInfo ? (
-      <div className="spinner-container">
+      <div className="spinner-container initial">
         <Loader />
       </div>
     ) : (

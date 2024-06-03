@@ -16,9 +16,10 @@ import { addPlaylist } from '../api';
 import '../App.css';
 
 const Widget = styled('div')(({ theme }) => ({
-  padding: 16,
+  padding: 12,
   borderRadius: 16,
-  width: 343,
+  width: 383,
+  height: 273,
   maxWidth: '100%',
   margin: 'auto',
   position: 'relative',
@@ -135,8 +136,8 @@ const MusicPlayer = ({ song, playlistId, iconType }) => {
             <img alt={song.name} src={song.album_cover_url} />
           </CoverImage>
           <Box sx={{ ml: 1.5, minWidth: 0 }}>
-            <Typography variant="caption" color="text.secondary" fontWeight={500}>
-              {song.artists}
+            <Typography variant="caption" color="text.secondary" fontWeight={500} font-size = {'0.9rem'} color = {'rgba(0,0,0,1)'}>
+              {song.artists.replace(/[\[\]']/g, '')}
             </Typography>
             <Typography noWrap>
               <b>{song.name}</b>
@@ -182,13 +183,32 @@ const MusicPlayer = ({ song, playlistId, iconType }) => {
           <TinyText>-{formatDuration(duration - position)}</TinyText>
         </Box>
         <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', mt: -1 }}>
-          <IconButton aria-label={paused ? 'play' : 'pause'} onClick={() => setPaused(!paused)}>
-            {paused ? (
-              <PlayArrowRounded sx={{ fontSize: '3rem' }} htmlColor={mainIconColor} />
-            ) : (
-              <PauseRounded sx={{ fontSize: '3rem' }} htmlColor={mainIconColor} />
+          {song.preview_url !== "pna" ? (
+            <>
+              <IconButton aria-label={paused ? 'play' : 'pause'} onClick={() => setPaused(!paused)}>
+                {paused ? (
+                  <PlayArrowRounded sx={{ fontSize: '2.7rem' }} htmlColor={mainIconColor} />
+                ) : (
+                  <PauseRounded sx={{ fontSize: '2.7rem' }} htmlColor={mainIconColor} />
+                )}
+              </IconButton>
+              <audio ref={audioRef} src={song.preview_url} />
+            </>
+          ) : (
+            <Typography variant="body2" color="textSecondary">
+              Preview not available
+            </Typography>
+          )}
+          <IconButton
+            aria-label={iconType === 'add' ? 'add' : 'favorite'}
+            onClick={iconType === 'add' ? handleAddClick : handleHeartClick}
+            ref={addButtonRef}
+          >
+            {iconType === 'add' ? <AddIcon /> : (
+              <FavoriteIcon sx={{ color: isHeartPressed ? 'red' : 'default' }} />
             )}
           </IconButton>
+          {showPopup && <Popup anchorEl={addButtonRef.current} message={popupMessage} />}
         </Box>
         <Stack spacing={2} direction="row" sx={{ mb: 1, px: 1 }} alignItems="center">
           <VolumeDownRounded htmlColor={lightIconColor} />
@@ -216,11 +236,7 @@ const MusicPlayer = ({ song, playlistId, iconType }) => {
           />
           <VolumeUpRounded htmlColor={lightIconColor} />
         </Stack>
-        <IconButton aria-label={iconType === 'add' ? 'add' : 'favorite'} onClick={iconType === 'add' ? handleAddClick : handleHeartClick} ref={addButtonRef}>
-          {iconType === 'add' ? <AddIcon /> : <FavoriteIcon sx={{ color: isHeartPressed ? 'red' : 'default' }} />}
-        </IconButton>
-        {showPopup && <Popup anchorEl={addButtonRef.current} message={popupMessage} />}
-        <audio ref={audioRef} src={song.preview_url} />
+       
       </Widget>
     </Box>
   );
