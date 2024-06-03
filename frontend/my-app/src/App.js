@@ -3,10 +3,10 @@ import { getProfile, savePlaylist, logout, login } from './api';
 import './App.css';
 import Home from './Home';
 import Header from './components/Header';
-import SongCard from './components/SongCard';
-import Box from '@mui/material/Box'; // Import Box from MUI
-import Rating from '@mui/material/Rating'; // Import Rating from MUI
-import Typography from '@mui/material/Typography'; // Import Typography from MUI
+import RefreshIcon from '@mui/icons-material/Refresh';
+import Box from '@mui/material/Box'; 
+import Rating from '@mui/material/Rating'; 
+import Typography from '@mui/material/Typography'; 
 import Button from '@mui/material/Button';
 import Profile from './Profile';
 import Footer from './components/Footer';
@@ -89,6 +89,7 @@ const App = () => {
               <h2>Recommended Songs</h2>
                 <Button variant="contained" color="primary" onClick={handleRefresh}>
                     Refresh songs
+                    <RefreshIcon />
                   </Button>
                   <Box sx={{ '& > legend': { mt: 2 } }}>
                       <Typography component="legend" 
@@ -127,6 +128,7 @@ const App = () => {
               <div className='recommendations-controller'> 
                 <Button variant="contained" color="primary" onClick={handleRefresh}>
                   Refresh songs
+                  <RefreshIcon />
                 </Button>
                 </div>
             </div>
