@@ -57,6 +57,7 @@ const App = () => {
   const handleRefresh = () => {
     refreshIndex = (refreshIndex + 1) % PLAYLIST_AMOUNT;
     setRecommendedPlaylist(recPlaylists[refreshIndex]);
+    updateStats("Guest", 'recommend');
   }
 
   const handleLogin = () => {
@@ -83,6 +84,7 @@ const App = () => {
     recPlaylists = recommendedPlaylists;
     setRecommendedPlaylist(recPlaylists[refreshIndex]);
     setLoading(false); 
+    updateStats("Guest", 'recommend'); 
   };
 
   const handleRatingChange = (newValue) => {
@@ -157,12 +159,12 @@ const App = () => {
                   <Button variant="contained" color="primary" onClick={() => handleLockRating(ratingValue)}>
                     Lock Rating
                   </Button>
-                )}
-                {ratingLocked && (
-                  <Button variant="contained" color="secondary" onClick={() => handleResetRating(ratingValue)}>
-                    Reset Rating
-                  </Button>
-                )}
+                  )}
+                  {ratingLocked && (
+                    <Button variant="contained" color="secondary" onClick={() => handleResetRating(ratingValue)}>
+                      Reset Rating
+                    </Button>
+                  )}
                 </Box>
               <div className="song-cards-container">
                 {recommendedPlaylist.map(song => (

@@ -466,7 +466,7 @@ def update_csv(user_id, action, rating=None):
         for row in reader:
             if row['user_id'] == user_id:
                 if action == 'recommend':
-                    row['total_recommended'] = int(row['total_recommended']) + 1
+                    row['total_recommended'] = int(row['total_recommended']) + 21
                 elif action == 'like':
                     row['songs_liked'] = int(row['songs_liked']) + 1
                 elif action == 'dislike':
@@ -486,7 +486,7 @@ def update_csv(user_id, action, rating=None):
     if not updated:
         new_row = {
             'user_id': user_id,
-            'total_recommended': 210,
+            'total_recommended': 21,
             'songs_liked': 1 if action == 'like' else 0,
             'songs_saved': 1 if action == 'save' else 0,
             'total_rating': rating if action == 'rate' and rating is not None else 0,
