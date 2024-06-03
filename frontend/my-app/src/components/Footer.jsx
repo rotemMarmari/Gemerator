@@ -16,12 +16,16 @@ const Footer = () => {
           <h3>Contact Us</h3>
           <p>
             <EmailIcon className="contact-icon" /> 
-            <a href="mailto:info@gemerator.com"> info@gemerator.com</a>
+            <a href="mailto:snirlevi34@gmail.com"> snirlevi34@gmail.com</a> 
           </p>
           <p>
+            <EmailIcon className="contact-icon" /> 
+            <a href="mailto:rmarmari6@gmail.com"> rmarmari6@gmail.com</a>
+          </p>
+          {/* <p>
             <ContactPhoneIcon className="contact-icon" /> 
             <a href="tel:+15551234567">  +1 (555) 123-4567</a>
-          </p>
+          </p> */}
         </div>
 
         <div className="footer-section follow-us">
@@ -52,7 +56,7 @@ const Footer = () => {
         </div>
       </div>
       <div className="footer-bottom">
-        <p>© 2024 Gemerator. All rights reserved.</p>
+        <p>© 2024 Gemerator by Snir Levi and Rotem Marmari. All rights reserved.</p>
       </div>
     </footer>
   );

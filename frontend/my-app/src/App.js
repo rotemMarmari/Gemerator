@@ -95,7 +95,7 @@ const App = () => {
 
   return (
     <div className="app-container">
-      <Header userInfo={userInfo} />
+      {/* <Header userInfo={userInfo} /> */}
       {!isAuthenticated ? (
         <div>
           <Home onLogin={handleLogin} onSongSelect={handleRecommend}/>
@@ -110,6 +110,7 @@ const App = () => {
               <h2>Recommended Songs</h2>
               <Button variant="contained" color="primary" onClick={handleRefresh}>
                   Refresh songs
+                  <RefreshIcon />
                 </Button>
               <Box sx={{ '& > legend': { mt: 2 } }}>
                   <Typography component="legend" 
@@ -153,19 +154,12 @@ const App = () => {
                     </Button>
                   )}
                 </Box>
-//               <div className="song-cards-container">
-//                 {recommendedPlaylist.map(song => (
-//                   <SongCard key={song.id} user_id={"Guest"} song={song} playlistId={playlistId} iconType="favorite" />
-//                </div>                
-//                  <Button variant="contained" color="primary" onClick={handleRefresh}>
-//                     Refresh songs
-//                     <RefreshIcon />
-//                   </Button> 
+
                     </div>
               <div className="song-cards-container">
                 {recommendedPlaylist.map(song => (
                   // <SongCard key={song.id} song={song} playlistId={playlistId} iconType="favorite" />
-                  <MusicPlayer key={song.id} song={song} playlistId={playlistId} iconType="favorite"/>
+                  <MusicPlayer key={song.id} user_id={"Guest"} song={song} playlistId={playlistId} iconType="favorite"/>
                 ))}
               </div>
               <div className='recommendations-controller'> 

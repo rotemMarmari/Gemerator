@@ -12,7 +12,7 @@ import VolumeDownRounded from '@mui/icons-material/VolumeDownRounded';
 import AddIcon from '@mui/icons-material/Add';
 import FavoriteIcon from '@mui/icons-material/Favorite';
 import Popup from './Popup';
-import { addPlaylist } from '../api';
+import { addToPlaylist, updateStats } from '../api';
 import '../App.css';
 
 const Widget = styled('div')(({ theme }) => ({
@@ -48,7 +48,7 @@ const TinyText = styled(Typography)({
   letterSpacing: 0.2,
 });
 
-const MusicPlayer = ({ song, playlistId, iconType }) => {
+const MusicPlayer = ({ user_id, song, playlistId, iconType }) => {
   const theme = useTheme();
   const audioRef = useRef(null);
   const duration = 29; // seconds
@@ -86,7 +86,7 @@ const MusicPlayer = ({ song, playlistId, iconType }) => {
 
   const handleAddClick = async () => {
     try {
-      const response = await addPlaylist(playlistId, song.id);
+      const response = await addToPlaylist(playlistId, song.id);
       if (response.data.error) {
         setPopupMessage(response.data.error);
       } else {
@@ -99,10 +99,12 @@ const MusicPlayer = ({ song, playlistId, iconType }) => {
     setTimeout(() => {
       setShowPopup(false);
     }, 2000);
+    updateStats(user_id, 'save');
   };
 
   const handleHeartClick = () => {
     setIsHeartPressed((prevState) => !prevState);
+    updateStats(user_id, isHeartPressed ? 'dislike' : 'like'); 
   };
 
   const handleSliderChange = (_, value) => {
@@ -136,7 +138,7 @@ const MusicPlayer = ({ song, playlistId, iconType }) => {
             <img alt={song.name} src={song.album_cover_url} />
           </CoverImage>
           <Box sx={{ ml: 1.5, minWidth: 0 }}>
-            <Typography variant="caption" color="text.secondary" fontWeight={500} font-size = {'0.9rem'} color = {'rgba(0,0,0,1)'}>
+            <Typography variant="caption" fontWeight={500} font-size = {'0.9rem'} color = {'rgba(0,0,0,1)'}>
               {song.artists.replace(/[\[\]']/g, '')}
             </Typography>
             <Typography noWrap>

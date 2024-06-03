@@ -6,6 +6,7 @@ import VirtualizedPlaylists from './VirtualizedPlaylists';
 import FormGroup from '@mui/material/FormGroup';
 import FormControlLabel from '@mui/material/FormControlLabel';
 import Checkbox from '@mui/material/Checkbox';
+import RefreshIcon from '@mui/icons-material/Refresh';
 import Button from '@mui/material/Button';
 import Box from '@mui/material/Box'; 
 import Rating from '@mui/material/Rating'; 
@@ -137,6 +138,7 @@ const Profile = ({ userInfo, userPlaylists, onLogout }) => {
             <div className='recommendations-controller'> 
             <Button variant="contained" color="primary" onClick={handleRefresh}>
               Refresh songs
+              <RefreshIcon />
             </Button>
             <Box sx={{ '& > legend': { mt: 2 } }}>
                 <Typography component="legend">Rate the playlists</Typography>
@@ -169,20 +171,18 @@ const Profile = ({ userInfo, userPlaylists, onLogout }) => {
                     </Button>
                   )}
                 </Box>
-//             <div className="song-cards-container">
-//               {recommendedPlaylist.map(song => (
-//                 <SongCard key={song.id} user_id={userInfo.id} song={song} playlistId={playlistId} iconType="add"/>
-// 
+
               </div>
             <div className="song-cards-container">
               {recommendedPlaylist.map(song => (
                 // <SongCard key={song.id} song={song} playlistId={playlistId} iconType="add"/>
-                <MusicPlayer key={song.id} song={song} playlistId={playlistId} iconType="add"/>
+                <MusicPlayer key={song.id} user_id={userInfo.id} song={song} playlistId={playlistId} iconType="add"/>
               ))}
             </div>
             <div className='recommendations-controller'> 
             <Button variant="contained" color="primary" onClick={handleRefresh}>
               Refresh songs
+              <RefreshIcon />
             </Button>
             </div>
           </div>
