@@ -8,7 +8,6 @@ import Header from "./components/Header";
 import Recommendation from "./components/Recommendations";
 
 const PLAYLIST_AMOUNT = 10;
-let refreshIndex = 0;
 let recPlaylists;
 
 const App = () => {
@@ -17,6 +16,7 @@ const App = () => {
   const [recommendedPlaylist, setRecommendedPlaylist] = useState([]);
   const [playlistId, setPlaylistId] = useState(null);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [recommendationKey, setRecommendationKey] = useState(0);
 
   useEffect(() => {
     if (isAuthenticated) {
@@ -45,8 +45,10 @@ const App = () => {
   };
 
   const handleRecommend = (recommendedPlaylists) => {
+    recPlaylists = null;
+    setRecommendationKey(prevKey => prevKey + 1);  // Update the key to remount the component
     recPlaylists = recommendedPlaylists;
-    setRecommendedPlaylist(recPlaylists[refreshIndex]);
+    setRecommendedPlaylist(recPlaylists[0]);
     updateStats("Guest", "recommend");
   };
 
@@ -59,6 +61,7 @@ const App = () => {
           <div>
             {recommendedPlaylist.length > 0 && (
               <Recommendation
+                key={recommendationKey}
                 recommendedPlaylists={recPlaylists}
                 user_Id={"Guest"}
                 playlistId={playlistId}

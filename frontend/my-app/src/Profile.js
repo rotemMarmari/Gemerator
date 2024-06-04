@@ -16,7 +16,7 @@ import Loader from "./components/Loader";
 import Recommendation from "./components/Recommendations";
 
 const PLAYLIST_AMOUNT = 10;
-let refreshIndex = 0;
+// let refreshIndex = 0;
 let recPlaylists;
 
 const Profile = ({ userInfo, userPlaylists, onLogout }) => {
@@ -44,9 +44,8 @@ const Profile = ({ userInfo, userPlaylists, onLogout }) => {
     setLoading(true); // Show the spinner
     savePlaylist(playlistId)
       .then((response) => {
-        // refreshIndex = 0;
         recPlaylists = response.data;
-        setRecommendedPlaylist(recPlaylists[refreshIndex]);
+        setRecommendedPlaylist(recPlaylists[0]);
         setLoading(false); // Hide the spinner
       })
       .catch((error) => {
@@ -65,14 +64,11 @@ const Profile = ({ userInfo, userPlaylists, onLogout }) => {
   };
 
   const handleCheckboxChange = (event) => {
-    setUseHistory(event.target.checked);
+    const isChecked = event.target.checked;
+    setUseHistory(isChecked);
+    toggleHistory(isChecked);
   };
-
-  useEffect(() => {
-    console.log(useHistory);
-    toggleHistory(useHistory);
-  }, [useHistory]);
-
+  
   return !userInfo ? (
     <div className="spinner-container initial">
       <Loader />

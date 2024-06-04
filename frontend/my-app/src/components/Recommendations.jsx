@@ -9,6 +9,7 @@ import { updateStats } from '../api';
 
 const PLAYLIST_AMOUNT = 10;
 let refreshIndex = 0;
+let refresh_start_over = false;
 
 const Recommendation = ({ recommendedPlaylists, user_Id, playlistId, iconType }) => {
   const [playlists, setPlaylists] = useState(recommendedPlaylists);
@@ -18,6 +19,7 @@ const Recommendation = ({ recommendedPlaylists, user_Id, playlistId, iconType })
 
   useEffect(() => {
     if (recommendedPlaylists.length > 0) {
+      refresh_start_over = false;
       setPlaylists(recommendedPlaylists);
       setCurrentPlaylist(playlists[0]);
     }
@@ -25,8 +27,11 @@ const Recommendation = ({ recommendedPlaylists, user_Id, playlistId, iconType })
 
   const handleRefresh = () => {
     refreshIndex = (refreshIndex + 1) % PLAYLIST_AMOUNT;
+    if(refreshIndex == 0)
+      refresh_start_over = true;
     setCurrentPlaylist(playlists[refreshIndex]);
-    updateStats(user_Id, "recommend");
+    if(!refresh_start_over)
+      updateStats(user_Id, "recommend");
   };
 
   const handleRatingChange = (newValue) => {
