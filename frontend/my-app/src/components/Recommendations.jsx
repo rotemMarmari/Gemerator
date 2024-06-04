@@ -49,7 +49,7 @@ const Recommendation = ({ recommendedPlaylists, user_Id, playlistId, iconType })
   return (
     <div className="recommendations">
       <div className="recommendations-controller">
-        <h2>Recommended Songs</h2>
+        <h2>More Gems For Your Playlist</h2>
         <Button variant="contained" color="primary" onClick={handleRefresh}>
           Refresh songs
           <RefreshIcon />

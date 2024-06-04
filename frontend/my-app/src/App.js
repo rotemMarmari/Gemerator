@@ -4,6 +4,7 @@ import "./App.css";
 import Home from "./Home";
 import Profile from "./Profile";
 import Footer from "./components/Footer";
+import Header from "./components/Header";
 import Recommendation from "./components/Recommendations";
 
 const PLAYLIST_AMOUNT = 10;
@@ -51,7 +52,7 @@ const App = () => {
 
   return (
     <div className="app-container">
-      {/* <Header userInfo={userInfo} /> */}
+      <Header userInfo={userInfo} />
       {!isAuthenticated ? (
         <div>
           <Home onLogin={handleLogin} onSongSelect={handleRecommend} />
