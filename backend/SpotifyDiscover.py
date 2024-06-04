@@ -446,7 +446,7 @@ def remove_song(song_id):
 def recommend():
     global selected_songs
     if not selected_songs:
-        return jsonify({"error": "No songs selected"})
+        return jsonify({"error": "No songs selected"}, 400)
 
     playlists = create_recommended_playlists(selected_songs, data, song_cluster_pipeline, n_songs=210, n_playlists=10)
     
