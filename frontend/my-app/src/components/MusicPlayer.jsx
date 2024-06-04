@@ -1,48 +1,49 @@
-import React, { useState , useEffect, useRef} from 'react';
-import { styled, useTheme } from '@mui/material/styles';
-import Box from '@mui/material/Box';
-import Typography from '@mui/material/Typography';
-import Slider from '@mui/material/Slider';
-import IconButton from '@mui/material/IconButton';
-import Stack from '@mui/material/Stack';
-import PauseRounded from '@mui/icons-material/PauseRounded';
-import PlayArrowRounded from '@mui/icons-material/PlayArrowRounded';
-import VolumeUpRounded from '@mui/icons-material/VolumeUpRounded';
-import VolumeDownRounded from '@mui/icons-material/VolumeDownRounded';
-import AddIcon from '@mui/icons-material/Add';
-import FavoriteIcon from '@mui/icons-material/Favorite';
-import Popup from './Popup';
-import { addToPlaylist, updateStats } from '../api';
-import '../App.css';
+import React, { useState, useEffect, useRef } from "react";
+import { styled, useTheme } from "@mui/material/styles";
+import Box from "@mui/material/Box";
+import Typography from "@mui/material/Typography";
+import Slider from "@mui/material/Slider";
+import IconButton from "@mui/material/IconButton";
+import Stack from "@mui/material/Stack";
+import PauseRounded from "@mui/icons-material/PauseRounded";
+import PlayArrowRounded from "@mui/icons-material/PlayArrowRounded";
+import VolumeUpRounded from "@mui/icons-material/VolumeUpRounded";
+import VolumeDownRounded from "@mui/icons-material/VolumeDownRounded";
+import AddIcon from "@mui/icons-material/Add";
+import FavoriteIcon from "@mui/icons-material/Favorite";
+import Popup from "./Popup";
+import { addToPlaylist, updateStats } from "../api";
+import "../App.css";
 
-const Widget = styled('div')(({ theme }) => ({
+const Widget = styled("div")(({ theme }) => ({
   padding: 12,
   borderRadius: 16,
   width: 383,
   height: 273,
-  maxWidth: '100%',
-  margin: 'auto',
-  position: 'relative',
+  maxWidth: "100%",
+  margin: "auto",
+  position: "relative",
   zIndex: 0,
-  backgroundColor: theme.palette.mode === 'dark' ? 'rgba(0,0,0,0.6)' : 'rgba(255,255,255,0.4)',
-  backdropFilter: 'blur(40px)',
+  backgroundColor:
+    theme.palette.mode === "dark" ? "rgba(0,0,0,0.6)" : "rgba(255,255,255,0.4)",
+  backdropFilter: "blur(40px)",
 }));
 
-const CoverImage = styled('div')({
+const CoverImage = styled("div")({
   width: 100,
   height: 100,
-  objectFit: 'cover',
-  overflow: 'hidden',
+  objectFit: "cover",
+  overflow: "hidden",
   flexShrink: 0,
   borderRadius: 8,
-  backgroundColor: 'rgba(0,0,0,0.08)',
-  '& > img': {
-    width: '100%',
+  backgroundColor: "rgba(0,0,0,0.08)",
+  "& > img": {
+    width: "100%",
   },
 });
 
 const TinyText = styled(Typography)({
-  fontSize: '0.75rem',
+  fontSize: "0.75rem",
   opacity: 0.38,
   fontWeight: 500,
   letterSpacing: 0.2,
@@ -58,7 +59,7 @@ const MusicPlayer = ({ user_id, song, playlistId, iconType }) => {
   const [isHeartPressed, setIsHeartPressed] = useState(false);
   const [showPopup, setShowPopup] = useState(false);
   const addButtonRef = useRef(null);
-  const [popupMessage, setPopupMessage] = useState('');
+  const [popupMessage, setPopupMessage] = useState("");
 
   useEffect(() => {
     if (audioRef.current) {
@@ -77,9 +78,9 @@ const MusicPlayer = ({ user_id, song, playlistId, iconType }) => {
 
     const audio = audioRef.current;
     if (audio) {
-      audio.addEventListener('timeupdate', handleTimeUpdate);
+      audio.addEventListener("timeupdate", handleTimeUpdate);
       return () => {
-        audio.removeEventListener('timeupdate', handleTimeUpdate);
+        audio.removeEventListener("timeupdate", handleTimeUpdate);
       };
     }
   }, []);
@@ -90,21 +91,21 @@ const MusicPlayer = ({ user_id, song, playlistId, iconType }) => {
       if (response.data.error) {
         setPopupMessage(response.data.error);
       } else {
-        setPopupMessage(response.data.message || 'Song added to playlist');
+        setPopupMessage(response.data.message || "Song added to playlist");
       }
     } catch (error) {
-      setPopupMessage('An error occurred');
+      setPopupMessage("An error occurred");
     }
     setShowPopup(true);
     setTimeout(() => {
       setShowPopup(false);
     }, 2000);
-    updateStats(user_id, 'save');
+    updateStats(user_id, "save");
   };
 
   const handleHeartClick = () => {
     setIsHeartPressed((prevState) => !prevState);
-    updateStats(user_id, isHeartPressed ? 'dislike' : 'like'); 
+    updateStats(user_id, isHeartPressed ? "dislike" : "like");
   };
 
   const handleSliderChange = (_, value) => {
@@ -127,19 +128,25 @@ const MusicPlayer = ({ user_id, song, playlistId, iconType }) => {
     return `${minute}:${secondLeft < 10 ? `0${secondLeft}` : secondLeft}`;
   }
 
-  const mainIconColor = theme.palette.mode === 'dark' ? '#fff' : '#000';
-  const lightIconColor = theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.4)' : 'rgba(0,0,0,0.4)';
+  const mainIconColor = theme.palette.mode === "dark" ? "#fff" : "#000";
+  const lightIconColor =
+    theme.palette.mode === "dark" ? "rgba(255,255,255,0.4)" : "rgba(0,0,0,0.4)";
 
   return (
-    <Box sx={{ width: '100%', overflow: 'hidden' }}>
+    <Box sx={{ width: "100%", overflow: "hidden" }}>
       <Widget>
-        <Box sx={{ display: 'flex', alignItems: 'center' }}>
+        <Box sx={{ display: "flex", alignItems: "center" }}>
           <CoverImage>
             <img alt={song.name} src={song.album_cover_url} />
           </CoverImage>
           <Box sx={{ ml: 1.5, minWidth: 0 }}>
-            <Typography variant="caption" fontWeight={500} font-size = {'0.9rem'} color = {'rgba(0,0,0,1)'}>
-              {song.artists.replace(/[\[\]']/g, '')}
+            <Typography
+              variant="caption"
+              fontWeight={500}
+              font-size={"0.9rem"}
+              color={"rgba(0,0,0,1)"}
+            >
+              {song.artists.replace(/[\[\]']/g, "")}
             </Typography>
             <Typography noWrap>
               <b>{song.name}</b>
@@ -158,40 +165,67 @@ const MusicPlayer = ({ user_id, song, playlistId, iconType }) => {
           max={duration}
           onChange={handleSliderChange}
           sx={{
-            color: theme.palette.mode === 'dark' ? '#fff' : 'rgba(0,0,0,0.87)',
+            color: theme.palette.mode === "dark" ? "#fff" : "rgba(0,0,0,0.87)",
             height: 4,
-            '& .MuiSlider-thumb': {
+            "& .MuiSlider-thumb": {
               width: 8,
               height: 8,
-              transition: '0.3s cubic-bezier(.47,1.64,.41,.8)',
-              '&::before': {
-                boxShadow: '0 2px 12px 0 rgba(0,0,0,0.4)',
+              transition: "0.3s cubic-bezier(.47,1.64,.41,.8)",
+              "&::before": {
+                boxShadow: "0 2px 12px 0 rgba(0,0,0,0.4)",
               },
-              '&:hover, &.Mui-focusVisible': {
-                boxShadow: `0px 0px 0px 8px ${theme.palette.mode === 'dark' ? 'rgb(255 255 255 / 16%)' : 'rgb(0 0 0 / 16%)'}`,
+              "&:hover, &.Mui-focusVisible": {
+                boxShadow: `0px 0px 0px 8px ${
+                  theme.palette.mode === "dark"
+                    ? "rgb(255 255 255 / 16%)"
+                    : "rgb(0 0 0 / 16%)"
+                }`,
               },
-              '&.Mui-active': {
+              "&.Mui-active": {
                 width: 20,
                 height: 20,
               },
             },
-            '& .MuiSlider-rail': {
+            "& .MuiSlider-rail": {
               opacity: 0.28,
             },
           }}
         />
-        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mt: -2 }}>
+        <Box
+          sx={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            mt: -2,
+          }}
+        >
           <TinyText>{formatDuration(position)}</TinyText>
           <TinyText>-{formatDuration(duration - position)}</TinyText>
         </Box>
-        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', mt: -1 }}>
+        <Box
+          sx={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            mt: -1,
+          }}
+        >
           {song.preview_url !== "pna" ? (
             <>
-              <IconButton aria-label={paused ? 'play' : 'pause'} onClick={() => setPaused(!paused)}>
+              <IconButton
+                aria-label={paused ? "play" : "pause"}
+                onClick={() => setPaused(!paused)}
+              >
                 {paused ? (
-                  <PlayArrowRounded sx={{ fontSize: '2.7rem' }} htmlColor={mainIconColor} />
+                  <PlayArrowRounded
+                    sx={{ fontSize: "2.7rem" }}
+                    htmlColor={mainIconColor}
+                  />
                 ) : (
-                  <PauseRounded sx={{ fontSize: '2.7rem' }} htmlColor={mainIconColor} />
+                  <PauseRounded
+                    sx={{ fontSize: "2.7rem" }}
+                    htmlColor={mainIconColor}
+                  />
                 )}
               </IconButton>
               <audio ref={audioRef} src={song.preview_url} />
@@ -202,43 +236,54 @@ const MusicPlayer = ({ user_id, song, playlistId, iconType }) => {
             </Typography>
           )}
           <IconButton
-            aria-label={iconType === 'add' ? 'add' : 'favorite'}
-            onClick={iconType === 'add' ? handleAddClick : handleHeartClick}
+            aria-label={iconType === "add" ? "add" : "favorite"}
+            onClick={iconType === "add" ? handleAddClick : handleHeartClick}
             ref={addButtonRef}
           >
-            {iconType === 'add' ? <AddIcon /> : (
-              <FavoriteIcon sx={{ color: isHeartPressed ? 'red' : 'default' }} />
+            {iconType === "add" ? (
+              <AddIcon />
+            ) : (
+              <FavoriteIcon
+                sx={{ color: isHeartPressed ? "red" : "default" }}
+              />
             )}
           </IconButton>
-          {showPopup && <Popup anchorEl={addButtonRef.current} message={popupMessage} />}
+          {showPopup && (
+            <Popup anchorEl={addButtonRef.current} message={popupMessage} />
+          )}
         </Box>
-        <Stack spacing={2} direction="row" sx={{ mb: 1, px: 1 }} alignItems="center">
+        <Stack
+          spacing={2}
+          direction="row"
+          sx={{ mb: 1, px: 1 }}
+          alignItems="center"
+        >
           <VolumeDownRounded htmlColor={lightIconColor} />
           <Slider
             aria-label="Volume"
             value={volume}
             onChange={handleVolumeChange}
             sx={{
-              color: theme.palette.mode === 'dark' ? '#fff' : 'rgba(0,0,0,0.87)',
-              '& .MuiSlider-track': {
-                border: 'none',
+              color:
+                theme.palette.mode === "dark" ? "#fff" : "rgba(0,0,0,0.87)",
+              "& .MuiSlider-track": {
+                border: "none",
               },
-              '& .MuiSlider-thumb': {
+              "& .MuiSlider-thumb": {
                 width: 24,
                 height: 24,
-                backgroundColor: '#fff',
-                '&::before': {
-                  boxShadow: '0 4px 8px rgba(0,0,0,0.4)',
+                backgroundColor: "#fff",
+                "&::before": {
+                  boxShadow: "0 4px 8px rgba(0,0,0,0.4)",
                 },
-                '&:hover, &.Mui-focusVisible, &.Mui-active': {
-                  boxShadow: 'none',
+                "&:hover, &.Mui-focusVisible, &.Mui-active": {
+                  boxShadow: "none",
                 },
               },
             }}
           />
           <VolumeUpRounded htmlColor={lightIconColor} />
         </Stack>
-       
       </Widget>
     </Box>
   );

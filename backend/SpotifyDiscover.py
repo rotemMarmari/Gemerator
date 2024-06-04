@@ -20,15 +20,20 @@ from sklearn.metrics.pairwise import cosine_similarity
 from collections import defaultdict
 from scipy.spatial.distance import cdist
 
+from dotenv import load_dotenv
+
+
 app = Flask(__name__, static_folder='../frontend/my-app/build', static_url_path='/')
 CORS(app, supports_credentials=True, resources={r"/*": {"origins": "http://localhost:3000"}})
 
 app.config['SESSION_COOKIE_ NAME'] = 'spotify cookie'
 app.secret_key = 'dbs*eit4^3785h!g8i9@0puew?r5'
 
+load_dotenv()
+
 TOKEN_INFO    = 'token_info'
-CLIENT_ID     = '11b6d46776d545af9be0a471e6ba9e56'
-CLIENT_SECRET = '128ce551f20e4d6e88e6f83f8766655a'
+CLIENT_ID     = os.getenv('CLIENT_ID')
+CLIENT_SECRET = os.getenv('CLIENT_SECRET')
 REDIRECT_URI  = 'http://localhost:5000'
 SCOPE         = 'user-read-recently-played user-library-read playlist-modify-public playlist-modify-private playlist-read-private'
 

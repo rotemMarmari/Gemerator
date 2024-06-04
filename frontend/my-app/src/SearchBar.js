@@ -7,7 +7,7 @@ const SearchBar = ({ onSongSelect }) => {
   const [query, setQuery] = useState('');
   const [suggestions, setSuggestions] = useState([]);
   const [selectedSongs, setSelectedSongs] = useState([]);
-  const [loading, setLoading] = useState(false); // Loading state
+  const [loading, setLoading] = useState(false); 
 
   const handleSearch = async (e) => {
     const value = e.target.value;
