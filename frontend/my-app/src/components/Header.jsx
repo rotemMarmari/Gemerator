@@ -1,19 +1,27 @@
-import '../App.css';
-import logo from '../assets/headphone-5-svgrepo-com.svg' 
-import Avatar from '@mui/material/Avatar';
+import "../App.css";
+import logo from "../assets/headphone-5-svgrepo-com.svg";
+import Avatar from "@mui/material/Avatar";
+import userIcon from "../assets/user-4-svgrepo-com.svg";
 
-const Header = ({userInfo}) => {
+const Header = ({ userInfo }) => {
   return (
     <header>
       <div className="left-header">
-        <img className='head-logo' src={logo} alt="Logo"/>
+        <img className="head-logo" src={logo} alt="Logo" />
         <h1>GEMERATOR</h1>
       </div>
       <div className="right-header">
-       {userInfo?.name && (<div className ="user-header">
-        <Avatar alt={userInfo.name} src={userInfo.image} />
-        <h2>{userInfo.name}</h2>
-        </div>)}
+        {userInfo ? (
+          <div className="user-header">
+            <Avatar alt={userInfo.name} src={userInfo.image} />
+            <h2>{userInfo.name}</h2>
+          </div>
+        ) : (
+          <div className="user-header">
+            <Avatar alt="Guest" src={userIcon} />
+            <h2>Guest</h2>
+          </div>
+        )}
       </div>
     </header>
   );

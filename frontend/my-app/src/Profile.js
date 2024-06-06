@@ -24,8 +24,8 @@ const Profile = ({ userInfo, userPlaylists, onLogout }) => {
   const [playlists, setPlaylists] = useState(userPlaylists);
   const [recommendedPlaylist, setRecommendedPlaylist] = useState([]);
   const [playlistId, setPlaylistId] = useState(null);
-  const [loading, setLoading] = useState(false); // State to manage loading spinner
-  const [useHistory, setUseHistory] = useState(false); // State for useHistory checkbox
+  const [loading, setLoading] = useState(false); 
+  const [useHistory, setUseHistory] = useState(false); 
 
   useEffect(() => {
     if (isAuthenticated) {

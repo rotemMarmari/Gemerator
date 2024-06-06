@@ -52,7 +52,7 @@ const TinyText = styled(Typography)({
 const MusicPlayer = ({ user_id, song, playlistId, iconType }) => {
   const theme = useTheme();
   const audioRef = useRef(null);
-  const duration = 29; // seconds
+  const duration = 29;
   const [position, setPosition] = useState(0);
   const [paused, setPaused] = useState(true);
   const [volume, setVolume] = useState(100);
@@ -99,7 +99,7 @@ const MusicPlayer = ({ user_id, song, playlistId, iconType }) => {
     setShowPopup(true);
     setTimeout(() => {
       setShowPopup(false);
-    }, 2000);
+    }, 3300);
     updateStats(user_id, "save");
   };
 
@@ -132,6 +132,10 @@ const MusicPlayer = ({ user_id, song, playlistId, iconType }) => {
   const lightIconColor =
     theme.palette.mode === "dark" ? "rgba(255,255,255,0.4)" : "rgba(0,0,0,0.4)";
 
+  const artistNames = Array.isArray(song.artists)
+    ? song.artists.join(", ").replace(/[\[\]']/g, "")
+    : song.artists.replace(/[\[\]']/g, "");
+
   return (
     <Box sx={{ width: "100%", overflow: "hidden" }}>
       <Widget>
@@ -146,7 +150,7 @@ const MusicPlayer = ({ user_id, song, playlistId, iconType }) => {
               font-size={"0.9rem"}
               color={"rgba(0,0,0,1)"}
             >
-              {song.artists.replace(/[\[\]']/g, "")}
+              {artistNames}
             </Typography>
             <Typography noWrap>
               <b>{song.name}</b>
