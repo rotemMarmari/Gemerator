@@ -15,7 +15,7 @@ Gemerator is a music recommendation website built using Flask and React, designe
 
 ## Tech Stack
 
-- **Backend**: Flask, Spotipy (Spotify API wrapper), Pandas, Scikit-learn, Joblib
+- **Backend**: Flask, Spotipy (Spotify API wrapper), Pandas, Scikit-learn, Joblib.
 - **Frontend**: React
 - **Database**: Currently using a simple CSV file for storing basic recommendation statistics. This can be scaled to a relational database (e.g., MySQL, PostgreSQL) for more complex data needs. The dataset that the system is powered by is a CSV file which contains detailed song information and is dynamically updated. We are also working on changing its format to Feather to save space and improve processing time.
 
