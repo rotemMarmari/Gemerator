@@ -20,3 +20,8 @@ export const updateStats = (user_id, action, rating = null) => {
   }
   return api.post(`/update_stats/${user_id}/${action}?${params.toString()}`);
 };
+
+export const searchSongs = (query) => api.get(`/search?q=${query}`);
+export const saveSong = (song) => api.post('/songs', song);
+export const removeSong = (songId) => api.delete(`/songs/${songId}`);
+export const recommendSongs = () => api.post('/recommend');
