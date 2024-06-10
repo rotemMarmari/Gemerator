@@ -40,6 +40,23 @@ body {
   gap: 0.3rem;
 }
 
+.popover-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 0.8rem;
+  background-color: #eeeeee;
+}
+
+.popover-content .MuiButton-root {
+  margin-block-end: calc(-1 * var(--encore-spacing-tighter-2, 8px));
+}
+
+.down-arrow{
+  padding-top: 0.3rem ;
+  padding-right: 0.3rem;
+}
+
 .user-header {
   display: flex;
   gap: 0.4rem;

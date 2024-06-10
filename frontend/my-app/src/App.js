@@ -1,20 +1,20 @@
 import React, { useState, useEffect } from "react";
-import { getProfile, savePlaylist, logout, login, updateStats } from "./api";
+import { BrowserRouter as Router, Route, Routes } from 'react-router-dom'; // Correct imports for React Router v6
+import { getProfile, logout, login, updateStats } from "./api";
 import "./App.css";
 import Home from "./Home";
 import Profile from "./Profile";
 import Footer from "./components/Footer";
 import Header from "./components/Header";
 import Recommendation from "./components/Recommendations";
+import Gems from "./Gems";
 
-const PLAYLIST_AMOUNT = 10;
 let recPlaylists;
 
 const App = () => {
   const [userInfo, setUserInfo] = useState(null);
   const [playlists, setPlaylists] = useState([]);
   const [recommendedPlaylist, setRecommendedPlaylist] = useState([]);
-  const [playlistId, setPlaylistId] = useState(null);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [recommendationKey, setRecommendationKey] = useState(0);
 
@@ -46,39 +46,47 @@ const App = () => {
 
   const handleRecommend = (recommendedPlaylists) => {
     recPlaylists = null;
-    setRecommendationKey(prevKey => prevKey + 1);  // Update the key to remount the component
+    setRecommendationKey((prevKey) => prevKey + 1); // Update the key to remount the component
     recPlaylists = recommendedPlaylists;
     setRecommendedPlaylist(recPlaylists[0]);
     updateStats("Guest", "recommend");
   };
 
   return (
-    <div className="app-container">
-      <Header userInfo={userInfo} />
-      {!isAuthenticated ? (
-        <div>
-          <Home onLogin={handleLogin} onSongSelect={handleRecommend} />
-          <div>
-            {recommendedPlaylist.length > 0 && (
-              <Recommendation
-                key={recommendationKey}
-                recommendedPlaylists={recPlaylists}
-                user_Id={"Guest"}
-                playlistId={playlistId}
-                iconType="favorite"
-              />
-            )}
-          </div>
-        </div>
-      ) : (
-        <Profile
-          userInfo={userInfo}
-          userPlaylists={playlists}
-          onLogout={handleLogout}
-        />
-      )}
-      <Footer />
-    </div>
+    <Router>
+      <div className="app-container">
+        <Header userInfo={userInfo} />
+        <Routes>
+          <Route
+            path="/"
+            element={
+              !isAuthenticated ? (
+                <div>
+                  <Home onLogin={handleLogin} onSongSelect={handleRecommend} />
+                  {recommendedPlaylist.length > 0 && (
+                    <Recommendation
+                      key={recommendationKey}
+                      recommendedPlaylists={recPlaylists}
+                      user_Id={"Guest"}
+                      playlistId={null}
+                      iconType="favorite"
+                    />
+                  )}
+                </div>
+              ) : (
+                <Profile
+                  userInfo={userInfo}
+                  userPlaylists={playlists}
+                  onLogout={handleLogout}
+                />
+              )
+            }
+          />
+          <Route path="/gems" element={<Gems />} />
+        </Routes>
+        <Footer />
+      </div>
+    </Router>
   );
 };
 

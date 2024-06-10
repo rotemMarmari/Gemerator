@@ -40,6 +40,7 @@ SCOPE         = 'user-read-recently-played user-library-read playlist-modify-pub
 use_history = False
 history_list = []
 selected_songs = []
+gems = []
 
 ###############################################################################################
 
@@ -292,7 +293,7 @@ def redirect_page():
     
     sp = spotipy.Spotify(auth=token_info['access_token'])
     current_user = sp.current_user()
-    print(current_user)
+    #print(current_user)
     user_info = {
         'id' : current_user['id'],
         'name': current_user['display_name'],
@@ -385,6 +386,31 @@ def toggle_history(useHistory):
             song = {'id': item['track']['id']}  
             history_list.append(song)
     return jsonify({"message": "history toggled"})
+
+@app.route('/add_to_gems/<song_id>', methods=['POST'])
+def add_to_gems(song_id):
+    song_df = find_song(song_id)
+    if song_df is not None and not song_df.empty:
+        # Convert DataFrame to dictionary
+        song_dict = song_df.to_dict(orient='records')[0]  # Convert the DataFrame row to a dictionary
+        gems.append(song_dict)
+        print(song_dict['name'])
+        return jsonify({"message": "Song added to gems"})
+    else:
+        return jsonify({"message": "Song not found"})
+
+@app.route('/delete_from_gems/<song_id>', methods=['DELETE'])
+def delete_from_gems(song_id):
+    for i, song in enumerate(gems):
+        if song['id'] == song_id:
+            gems.pop(i)
+            print("Deleted", song_id)
+            break
+    return jsonify({"message": "Song deleted from gems"})
+
+@app.route('/gems')
+def get_gems():
+    return jsonify(gems)
 
 def get_token():
     token_info = session.get(TOKEN_INFO, None)

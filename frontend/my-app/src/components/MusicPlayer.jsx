@@ -11,8 +11,9 @@ import VolumeUpRounded from "@mui/icons-material/VolumeUpRounded";
 import VolumeDownRounded from "@mui/icons-material/VolumeDownRounded";
 import AddIcon from "@mui/icons-material/Add";
 import FavoriteIcon from "@mui/icons-material/Favorite";
+import DeleteIcon from '@mui/icons-material/Delete';
 import Popup from "./Popup";
-import { addToPlaylist, updateStats } from "../api";
+import { addToPlaylist, updateStats, addSongToGems, deleteFromGems } from "../api";
 import "../App.css";
 
 const Widget = styled("div")(({ theme }) => ({
@@ -49,7 +50,7 @@ const TinyText = styled(Typography)({
   letterSpacing: 0.2,
 });
 
-const MusicPlayer = ({ user_id, song, playlistId, iconType }) => {
+const MusicPlayer = ({ user_id, song, playlistId, iconType, onSongDelete }) => {
   const theme = useTheme();
   const audioRef = useRef(null);
   const duration = 29;
@@ -106,6 +107,16 @@ const MusicPlayer = ({ user_id, song, playlistId, iconType }) => {
   const handleHeartClick = () => {
     setIsHeartPressed((prevState) => !prevState);
     updateStats(user_id, isHeartPressed ? "dislike" : "like");
+    addSongToGems(song.id);
+  };
+
+  const handleDeleteClick = async () => {
+    try {
+      await deleteFromGems(song.id);
+      onSongDelete(song.id); // Call the passed function to update the state in Gems component
+    } catch (error) {
+      console.error("Error deleting song:", error);
+    }
   };
 
   const handleSliderChange = (_, value) => {
@@ -239,19 +250,35 @@ const MusicPlayer = ({ user_id, song, playlistId, iconType }) => {
               Preview not available
             </Typography>
           )}
-          <IconButton
-            aria-label={iconType === "add" ? "add" : "favorite"}
-            onClick={iconType === "add" ? handleAddClick : handleHeartClick}
-            ref={addButtonRef}
-          >
-            {iconType === "add" ? (
+          {iconType === "add" && (
+            <IconButton
+              aria-label="add"
+              onClick={handleAddClick}
+              ref={addButtonRef}
+            >
               <AddIcon />
-            ) : (
+            </IconButton>
+          )}
+          {iconType === "favorite" && (
+            <IconButton
+              aria-label="favorite"
+              onClick={handleHeartClick}
+              ref={addButtonRef}
+            >
               <FavoriteIcon
                 sx={{ color: isHeartPressed ? "red" : "default" }}
               />
-            )}
-          </IconButton>
+            </IconButton>
+          )}
+          {iconType === "delete" && (
+            <IconButton
+              aria-label="delete"
+              onClick={handleDeleteClick}
+              ref={addButtonRef}
+            >
+              <DeleteIcon />
+            </IconButton>
+          )}
           {showPopup && (
             <Popup anchorEl={addButtonRef.current} message={popupMessage} />
           )}
