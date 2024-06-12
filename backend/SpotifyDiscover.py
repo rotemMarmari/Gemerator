@@ -44,7 +44,7 @@ gems = []
 
 ###############################################################################################
 
-data_path = "data/final_dataset_with_urls.csv"
+data_path = "data/final_song_dataset.csv"
 
 data = pd.read_csv(data_path)
 # data = pd.read_feather(data_path)
@@ -52,7 +52,7 @@ data = pd.read_csv(data_path)
 feature_cols = ['valence', 'year', 'acousticness', 'danceability', 'duration_ms', 'energy',
 'instrumentalness', 'liveness', 'loudness', 'mode', 'speechiness', 'tempo', 'popularity']
 
-song_cluster_pipeline = joblib.load('song_cluster_pipeline.pkl')
+song_cluster_pipeline = joblib.load('kmeans_pipeline.joblib')
 
 sp = spotipy.Spotify(auth_manager=SpotifyClientCredentials(client_id=CLIENT_ID, client_secret=CLIENT_SECRET))
 
@@ -70,7 +70,7 @@ def add_row_to_data(song_df):
     global data
     # data.to_feather("data/final_dataset_with_urls.feather")
     song_df.to_csv(data_path, mode='a', header=False, index=False)
-    print(song_df['id'], "added to data")
+    # print(song_df['id'], "added to data")
     pass
 
 def update_data():
@@ -160,6 +160,7 @@ def get_song_data(song, spotify_data):
         if song_data is not None:
             # print(song_data['artists'])
             add_song_to_dataset(song_data)
+            # song_data = song_data.iloc[0]
             return song_data
         else:
             return None
@@ -275,14 +276,12 @@ def home_page():
     global selected_songs
     selected_songs = []
     return jsonify({"message": "Welcome to the Spotify recommendation system!"})
-    #return send_from_directory(app.static_folder,'home.html')
 
 @app.route('/login')
 def login():
     auth_url = create_spotify_oauth().get_authorize_url()
-    print(auth_url)
+    # print(auth_url)
     return jsonify({"auth_url": auth_url})
-    #return redirect(auth_url)
 
 @app.route('/profile')
 def redirect_page():
@@ -308,8 +307,6 @@ def redirect_page():
     }
     user_playlists.append(saved_tracks_playlist)
     return jsonify({'user_info': user_info, 'user_playlists': user_playlists})
-    #return render_template('profile.html', user_info=user_info, user_playlists=user_playlists)
-    #return jsonify(userInfo=user_info, userPlaylists=user_playlists)
 
 @app.route('/savePlaylist/<playlist_id>')
 def save_playlist(playlist_id):
@@ -329,19 +326,36 @@ def save_playlist(playlist_id):
             song = {'id': item['track']['id']}  
             playlist_tracks_data.append(song)     
     else:
-        # Handle the case for other playlists
-        playlist_tracks = sp.playlist_tracks(playlist_id)['items']
+        # Initialize variables for pagination
+        offset = 0
+        limit = 100  # Maximum limit per request
 
-        for item in playlist_tracks:
-            song = {'id': item['track']['id']}  
-            playlist_tracks_data.append(song)
+        # Keep fetching tracks until all tracks are retrieved
+        while True:
+            # Get the tracks of the selected playlist with pagination
+            playlist_tracks = sp.playlist_tracks(playlist_id, offset=offset, limit=limit)
+
+            for item in playlist_tracks['items']:
+                track = item['track']
+                song = {'id': track['id']}
+                playlist_tracks_data.append(song)
+            
+            # Move to the next page
+            offset += limit
+
+            # Check if there are more tracks to fetch
+            if len(playlist_tracks['items']) < limit:
+                break
 
     if use_history:
             playlist_tracks_data.extend(history_list)
 
+    print(len(playlist_tracks_data))
+
     playlists = create_recommended_playlists(playlist_tracks_data, data, song_cluster_pipeline, n_songs=210, n_playlists=10)
 
     return jsonify(playlists)
+
 
 @app.route('/add_song_to_playlist/<playlist_id>/<track_id>', methods=['POST'])
 def add_song_to_playlist(playlist_id, track_id):
