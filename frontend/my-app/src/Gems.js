@@ -1,7 +1,7 @@
-import React, { useEffect, useState } from 'react';
-import { getGems } from './api'; 
-import MusicPlayer from './components/MusicPlayer';
-import './Gems.css';
+import React, { useEffect, useState } from "react";
+import { getGems } from "./api";
+import MusicPlayer from "./components/MusicPlayer";
+import "./Gems.css";
 
 const Gems = () => {
   const [likedSongs, setLikedSongs] = useState([]);
@@ -12,20 +12,26 @@ const Gems = () => {
         setLikedSongs(response.data);
       })
       .catch((error) => {
-        console.error('Error fetching liked songs:', error);
+        console.error("Error fetching liked songs:", error);
       });
   }, []);
-  
+
   const handleDelete = (songId) => {
-    setLikedSongs(likedSongs.filter(song => song.id !== songId));
+    setLikedSongs(likedSongs.filter((song) => song.id !== songId));
   };
 
   return (
     <div className="gems-container">
-      <h1>Your Gems</h1>
+      <h1>My Gems</h1>
       <div className="song-cards-container">
         {likedSongs.map((song) => (
-          <MusicPlayer key={song.id} user_id={"User"} song={song} iconType="delete" onSongDelete={handleDelete}/>
+          <MusicPlayer
+            key={song.id}
+            user_id={"User"}
+            song={song}
+            iconType="delete"
+            onSongDelete={handleDelete}
+          />
         ))}
       </div>
     </div>
