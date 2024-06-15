@@ -1,14 +1,22 @@
 import React, { useEffect } from 'react';
+import { useNavigate  } from 'react-router-dom';
 import SearchBar from './SearchBar';
 import './home.css';
 import spotifyLogo from './assets/spotify-logo-fill-svgrepo-com.svg';
 import { home } from './api'
 
 const Home = ({ onLogin, onSongSelect}) => {
+  const navigate = useNavigate();
   
   useEffect(() => {
     home();
   }, [])
+
+  const handleLoginClick = () => {
+    onLogin().then(() => {
+      navigate('/profile');
+    });
+  };
 
   return (
     <div className="app-container">
@@ -20,7 +28,7 @@ const Home = ({ onLogin, onSongSelect}) => {
              playlists that resonate with your unique musical taste,
             ensuring every track is a gem polished just for you.</p>
           <div className="login-button-container">
-            <button onClick={onLogin} className="login-button">
+            <button onClick={handleLoginClick} className="login-button">
               <div className="button-content">
               <span>Login with Spotify</span>
                 <img className='spotify-logo' src={spotifyLogo} alt="Logo"/>

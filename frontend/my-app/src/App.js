@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { BrowserRouter as Router, Route, Routes } from 'react-router-dom'; // Correct imports for React Router v6
+import { BrowserRouter as Router, Route, Routes, Navigate } from 'react-router-dom'; // Correct imports for React Router v6
 import { getProfile, logout, login, updateStats } from "./api";
 import "./App.css";
 import Home from "./Home";
@@ -32,7 +32,7 @@ const App = () => {
   }, [isAuthenticated]);
 
   const handleLogin = () => {
-    login().then(() => setIsAuthenticated(true));
+    return login().then(() => setIsAuthenticated(true));
   };
 
   const handleLogout = () => {
@@ -60,7 +60,6 @@ const App = () => {
           <Route
             path="/"
             element={
-              !isAuthenticated ? (
                 <div>
                   <Home onLogin={handleLogin} onSongSelect={handleRecommend} />
                   {recommendedPlaylist.length > 0 && (
@@ -73,12 +72,19 @@ const App = () => {
                     />
                   )}
                 </div>
-              ) : (
+            }
+          />
+          <Route
+            path="/profile"
+            element={
+              isAuthenticated ? (
                 <Profile
                   userInfo={userInfo}
                   userPlaylists={playlists}
                   onLogout={handleLogout}
                 />
+              ) : (
+                <Navigate to="/" />
               )
             }
           />

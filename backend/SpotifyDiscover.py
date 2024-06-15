@@ -41,52 +41,66 @@ use_history = False
 history_list = []
 selected_songs = []
 gems = []
-
+gems_ids = []
 ###############################################################################################
 
-data_path = "data/final_dataset_with_urls.csv"
+data_path = "data/final_song_dataset.csv"
 
 data = pd.read_csv(data_path)
 # data = pd.read_feather(data_path)
 
+scaler = joblib.load('scaler.joblib')
+
 feature_cols = ['valence', 'year', 'acousticness', 'danceability', 'duration_ms', 'energy',
 'instrumentalness', 'liveness', 'loudness', 'mode', 'speechiness', 'tempo', 'popularity']
 
-song_cluster_pipeline = joblib.load('song_cluster_pipeline.pkl')
+scaled_data = scaler.transform(data[feature_cols])
 
 sp = spotipy.Spotify(auth_manager=SpotifyClientCredentials(client_id=CLIENT_ID, client_secret=CLIENT_SECRET))
 
-# def add_song_to_dataset(song_df):
-#     global data
-#     # Convert song_data to a DataFrame and reset the index
-#     data = pd.concat([data, song_df], ignore_index=True)
-#    # Append the new song data to the dataset file
-#     print("adding new song to data...", song_df['id'])
-#     song_df = song_df[data.columns]
-#     # feather.write_feather(data, 'data/final_dataset_with_urls - Copy.feather')
-#     data.to_feather('data/final_dataset_with_urls.feather')
-
 def add_row_to_data(song_df):
     global data
-    # data.to_feather("data/final_dataset_with_urls.feather")
-    song_df.to_csv(data_path, mode='a', header=False, index=False)
-    print(song_df['id'], "added to data")
+    # data.to_feather(data_path)
+    song_df.to_csv(data_path, mode='a', header=False, index=False) 
+    # print(song_df['id'], "added to data")
     pass
 
 def update_data():
     global data
-    # data.to_feather("data/final_dataset_with_urls - Copy.feather")
+    # data.to_feather(data_path)
     data.to_csv(data_path, index=False)
     print("updated data")
     pass
 
+# def add_song_to_dataset(song_df):
+#     global data
+#     global scaled_data
+#     # Convert song_data to a DataFrame and reset the index
+#     data = pd.concat([data, song_df], ignore_index=True)
+#     # Update the scaled data
+#     scaled_data = scaler.transform(data[feature_cols]) 
+
+#    # Append the new song data to the dataset file
+#     print("adding new song to data...", song_df['id'])
+#     song_df = song_df[data.columns] # rearrange the columns to fit the feather
+#     # feather.write_feather(data, 'data/final_dataset_with_urls - Copy.feather')
+#     # data.to_feather('data/final_dataset_with_urls.feather')
+
+#     print(type(song_df['artists']))
+#     print(data['artists'].dtypes)
+#     # data_save_thread = threading.Thread(target=add_row_to_data, args=(song_df,))
+#     # data_save_thread.start()
+
 def add_song_to_dataset(song_df):
     global data
+    global scaled_data
     # Append the new song data to the in-memory dataset
     data = pd.concat([data, song_df], ignore_index=True)
-    # Append the new song data to the dataset file
-    song_df = song_df[data.columns]
+    # Update the scaled data
+    scaled_data = scaler.transform(data[feature_cols]) 
 
+    # Append the new song data to the dataset csv file
+    song_df = song_df[data.columns] # rearrange the columns to fit the csv
     data_save_thread = threading.Thread(target=add_row_to_data, args=(song_df,))
     data_save_thread.start()
 
@@ -160,6 +174,7 @@ def get_song_data(song, spotify_data):
         if song_data is not None:
             # print(song_data['artists'])
             add_song_to_dataset(song_data)
+            # song_data = song_data.iloc[0]
             return song_data
         else:
             return None
@@ -191,13 +206,13 @@ def flatten_dict_list(dict_list):
             
     return flattened_dict
 
-def recommend_songs(song_list, spotify_data, song_cluster_pipeline, n_songs=10):
+def recommend_songs(song_list, spotify_data, scaled_data, scaler, n_songs=10):
     song_dict = flatten_dict_list(song_list)
     song_center = get_mean_vector(song_list, spotify_data)
     
-    scaler = song_cluster_pipeline.steps[0][1]
-    scaled_data = scaler.transform(spotify_data[feature_cols])
-    scaled_song_center = scaler.transform(song_center.reshape(1, -1))
+    # scaler = song_cluster_pipeline.steps[0][1]
+    # scaled_data = scaler.transform(spotify_data[feature_cols])
+    scaled_song_center = scaler.transform(song_center.reshape(1,-1))
     
     # Compute cosine similarity between the input songs and Spotify data
     similarities = cosine_similarity(scaled_song_center, scaled_data)
@@ -241,8 +256,63 @@ def recommend_songs(song_list, spotify_data, song_cluster_pipeline, n_songs=10):
     metadata_cols = ['name', 'year', 'artists', 'id', 'preview_url', 'album_cover_url']
     return rec_songs_df[metadata_cols].to_dict(orient='records')
 
-def create_recommended_playlists(song_list, data, song_cluster_pipeline, n_songs, n_playlists):
-    playlist = recommend_songs(song_list, data, song_cluster_pipeline, n_songs=n_songs)    
+'''
+FAISS, which stands for Facebook AI Similarity Search, is a library developed by Facebook AI that enables efficient similarity search.
+It's designed to handle large scale datasets and is particularly useful for tasks like recommendation systems.
+'''
+import faiss
+
+def recommend_songs_faiss(song_list, spotify_data, scaled_data, scaler, n_songs=10):
+    song_dict = flatten_dict_list(song_list)  
+    song_center = get_mean_vector(song_list, spotify_data) 
+    scaled_song_center = scaler.transform(song_center.reshape(1,-1))
+    
+    # Initialize FAISS index
+    d = scaled_data.shape[1]  # dimension
+    index = faiss.IndexFlatIP(d)  # using Inner Product (cosine similarity)
+    
+    # Add the scaled data to the FAISS index
+    index.add(scaled_data.astype(np.float32))
+    
+    # Search the nearest neighbors
+    k = n_songs * 10  # number of nearest neighbors to retrieve
+    D, I = index.search(scaled_song_center.astype(np.float32), k)
+    
+    # Retrieve the recommended songs
+    recommended_indices = I[0]
+    rec_songs = spotify_data.iloc[recommended_indices]
+    
+    # Filter out the input songs from the recommendations
+    rec_songs = rec_songs[~rec_songs['id'].isin(song_dict['id'])]        
+    rec_songs = rec_songs.drop_duplicates(subset='id')
+    
+    # Initialize an empty list to store unique recommended songs
+    unique_rec_songs = []
+    
+    # Append new unique recommendations to the list
+    for _, song in rec_songs.iterrows():
+        is_duplicate = song['id'] in [s['id'] for s in unique_rec_songs]
+        # If not a duplicate by ID, check by name and artists
+        if not is_duplicate:
+            is_duplicate = any(
+                (song['name'] == s['name'] and song['artists'] == s['artists']) 
+                for s in unique_rec_songs
+            )
+        if not is_duplicate:
+            unique_rec_songs.append(song)
+        if len(unique_rec_songs) >= n_songs:
+            break
+    
+    rec_songs_df = pd.DataFrame(unique_rec_songs)   
+    rec_songs_df = rec_songs_df.head(n_songs)
+    
+    # Return recommended songs metadata
+    metadata_cols = ['name', 'year', 'artists', 'id', 'preview_url', 'album_cover_url']
+    return rec_songs_df[metadata_cols].to_dict(orient='records')
+
+def create_recommended_playlists(song_list, data, scaled_data, scaler, n_songs, n_playlists):
+    playlist = recommend_songs(song_list, data, scaled_data, scaler, n_songs=n_songs)    
+    # playlist = recommend_songs_faiss(song_list, data, scaled_data, scaler, n_songs=n_songs)   
     random.shuffle(playlist)
     
     songs_per_playlist = n_songs // n_playlists    
@@ -275,14 +345,12 @@ def home_page():
     global selected_songs
     selected_songs = []
     return jsonify({"message": "Welcome to the Spotify recommendation system!"})
-    #return send_from_directory(app.static_folder,'home.html')
 
 @app.route('/login')
 def login():
     auth_url = create_spotify_oauth().get_authorize_url()
-    print(auth_url)
+    # print(auth_url)
     return jsonify({"auth_url": auth_url})
-    #return redirect(auth_url)
 
 @app.route('/profile')
 def redirect_page():
@@ -308,8 +376,6 @@ def redirect_page():
     }
     user_playlists.append(saved_tracks_playlist)
     return jsonify({'user_info': user_info, 'user_playlists': user_playlists})
-    #return render_template('profile.html', user_info=user_info, user_playlists=user_playlists)
-    #return jsonify(userInfo=user_info, userPlaylists=user_playlists)
 
 @app.route('/savePlaylist/<playlist_id>')
 def save_playlist(playlist_id):
@@ -329,19 +395,36 @@ def save_playlist(playlist_id):
             song = {'id': item['track']['id']}  
             playlist_tracks_data.append(song)     
     else:
-        # Handle the case for other playlists
-        playlist_tracks = sp.playlist_tracks(playlist_id)['items']
+        # Initialize variables for pagination
+        offset = 0
+        limit = 100  # Maximum limit per request
 
-        for item in playlist_tracks:
-            song = {'id': item['track']['id']}  
-            playlist_tracks_data.append(song)
+        # Keep fetching tracks until all tracks are retrieved
+        while True:
+            # Get the tracks of the selected playlist with pagination
+            playlist_tracks = sp.playlist_tracks(playlist_id, offset=offset, limit=limit)
+
+            for item in playlist_tracks['items']:
+                track = item['track']
+                song = {'id': track['id']}
+                playlist_tracks_data.append(song)
+            
+            # Move to the next page
+            offset += limit
+
+            # Check if there are more tracks to fetch
+            if len(playlist_tracks['items']) < limit:
+                break
 
     if use_history:
             playlist_tracks_data.extend(history_list)
 
-    playlists = create_recommended_playlists(playlist_tracks_data, data, song_cluster_pipeline, n_songs=210, n_playlists=10)
+    print(len(playlist_tracks_data))
+
+    playlists = create_recommended_playlists(playlist_tracks_data, data, scaled_data, scaler, n_songs=210, n_playlists=10)
 
     return jsonify(playlists)
+
 
 @app.route('/add_song_to_playlist/<playlist_id>/<track_id>', methods=['POST'])
 def add_song_to_playlist(playlist_id, track_id):
@@ -387,24 +470,22 @@ def toggle_history(useHistory):
             history_list.append(song)
     return jsonify({"message": "history toggled"})
 
-@app.route('/add_to_gems/<song_id>', methods=['POST'])
-def add_to_gems(song_id):
-    song_df = find_song(song_id)
-    if song_df is not None and not song_df.empty:
-        # Convert DataFrame to dictionary
-        song_dict = song_df.to_dict(orient='records')[0]  # Convert the DataFrame row to a dictionary
-        gems.append(song_dict)
-        print(song_dict['name'])
-        return jsonify({"message": "Song added to gems"})
-    else:
-        return jsonify({"message": "Song not found"})
+@app.route('/add_to_gems', methods=['POST'])
+def add_to_gems():
+    song = request.get_json()
+    song_id = song.get('id')
+    if song_id not in gems_ids:
+        gems.append(song)   
+        gems_ids.append(song_id)
+    return jsonify({"message": "Song added to gems"})
 
 @app.route('/delete_from_gems/<song_id>', methods=['DELETE'])
 def delete_from_gems(song_id):
     for i, song in enumerate(gems):
         if song['id'] == song_id:
             gems.pop(i)
-            print("Deleted", song_id)
+            gems_ids.remove(song_id)
+            # print("Deleted", song_id)
             break
     return jsonify({"message": "Song deleted from gems"})
 
@@ -474,7 +555,7 @@ def recommend():
     if not selected_songs:
         return jsonify({"error": "No songs selected"}, 400)
 
-    playlists = create_recommended_playlists(selected_songs, data, song_cluster_pipeline, n_songs=210, n_playlists=10)
+    playlists = create_recommended_playlists(selected_songs, data, scaled_data, scaler, n_songs=210, n_playlists=10)
     
     return jsonify(playlists)
 

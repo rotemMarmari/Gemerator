@@ -57,6 +57,7 @@ const Footer = () => {
       </div>
       <div className="footer-bottom">
         <p>© 2024 Gemerator by Snir Levi and Rotem Marmari. All rights reserved.</p>
+        <p>Content provided by Spotify</p>
       </div>
     </footer>
   );
