@@ -41,7 +41,7 @@ use_history = False
 history_list = []
 selected_songs = []
 gems = []
-
+gems_ids = []
 ###############################################################################################
 
 data_path = "data/final_song_dataset.csv"
@@ -57,8 +57,6 @@ feature_cols = ['valence', 'year', 'acousticness', 'danceability', 'duration_ms'
 scaled_data = scaler.transform(data[feature_cols])
 
 sp = spotipy.Spotify(auth_manager=SpotifyClientCredentials(client_id=CLIENT_ID, client_secret=CLIENT_SECRET))
-
-
 
 def add_row_to_data(song_df):
     global data
@@ -472,24 +470,22 @@ def toggle_history(useHistory):
             history_list.append(song)
     return jsonify({"message": "history toggled"})
 
-@app.route('/add_to_gems/<song_id>', methods=['POST'])
-def add_to_gems(song_id):
-    song_df = find_song(song_id)
-    if song_df is not None and not song_df.empty:
-        # Convert DataFrame to dictionary
-        song_dict = song_df.to_dict(orient='records')[0]  # Convert the DataFrame row to a dictionary
-        gems.append(song_dict)
-        print(song_dict['name'])
-        return jsonify({"message": "Song added to gems"})
-    else:
-        return jsonify({"message": "Song not found"})
+@app.route('/add_to_gems', methods=['POST'])
+def add_to_gems():
+    song = request.get_json()
+    song_id = song.get('id')
+    if song_id not in gems_ids:
+        gems.append(song)   
+        gems_ids.append(song_id)
+    return jsonify({"message": "Song added to gems"})
 
 @app.route('/delete_from_gems/<song_id>', methods=['DELETE'])
 def delete_from_gems(song_id):
     for i, song in enumerate(gems):
         if song['id'] == song_id:
             gems.pop(i)
-            print("Deleted", song_id)
+            gems_ids.remove(song_id)
+            # print("Deleted", song_id)
             break
     return jsonify({"message": "Song deleted from gems"})
 

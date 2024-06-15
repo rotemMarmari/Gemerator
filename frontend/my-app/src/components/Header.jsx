@@ -26,6 +26,11 @@ const Header = ({ userInfo }) => {
     handleClose();
   };
 
+  const navigateHome = () => {
+    navigate("/");
+    // window.location.reload();
+  }
+
   const open = Boolean(anchorEl);
   const id = open ? "simple-popover" : undefined;
   const popoverWidth = rightHeaderRef.current
@@ -34,7 +39,7 @@ const Header = ({ userInfo }) => {
 
   return (
     <header>
-      <div className="left-header">
+      <div className="left-header" onClick={navigateHome} style={{ cursor: 'pointer' }}>
         <img className="head-logo" src={logo} alt="Logo" />
         <h1>GEMERATOR</h1>
       </div>

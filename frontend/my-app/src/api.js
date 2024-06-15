@@ -27,7 +27,7 @@ export const searchSongs = (query) => api.get(`/search?q=${query}`);
 export const saveSong = (song) => api.post("/songs", song);
 export const removeSong = (songId) => api.delete(`/songs/${songId}`);
 export const recommendSongs = () => api.post("/recommend");
-export const addSongToGems = (songId) => api.post(`/add_to_gems/${songId}`);
+export const addSongToGems = (song) => api.post('/add_to_gems', song);
 export const getGems = () => api.get(`/gems`)
 export const deleteFromGems = async (songId) => {
   return await axios.delete(`/delete_from_gems/${songId}`);

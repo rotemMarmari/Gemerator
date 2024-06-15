@@ -102,12 +102,18 @@ const MusicPlayer = ({ user_id, song, playlistId, iconType, onSongDelete }) => {
       setShowPopup(false);
     }, 3300);
     updateStats(user_id, "save");
+    addSongToGems(song);
   };
 
   const handleHeartClick = () => {
     setIsHeartPressed((prevState) => !prevState);
     updateStats(user_id, isHeartPressed ? "dislike" : "like");
-    addSongToGems(song.id);
+    if (!isHeartPressed) {
+      // addSongToGems(song.id);
+      addSongToGems(song);
+    } else {
+      deleteFromGems(song.id);
+    }
   };
 
   const handleDeleteClick = async () => {
