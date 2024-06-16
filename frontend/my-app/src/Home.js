@@ -24,9 +24,14 @@ const Home = ({ onLogin, onSongSelect}) => {
         <div className='home-greeting'>
           <h1>GEMERATOR</h1>
           <h2>Unearth Your Sound Jewel</h2>
-          <p>At Gemerator, we harness the power of machine learning to craft personalized
-             playlists that resonate with your unique musical taste,
-            ensuring every track is a gem polished just for you.</p>
+          <p>
+          At Gemerator, We offer personalized playlist creation by analyzing your favorite songs. Connect your Spotify account to unlock playlists that resonate with your unique musical taste.  Every track will be a gem, polished just for you.
+          <br/>
+          <br/>
+          <strong>Prefer to create playlists yourself?</strong> No problem!  Gemerator also allows you to manually build playlists for any occasion.
+          <br/>
+          <br/>
+          <strong>Join us and elevate your music experience today!</strong></p>
           <div className="login-button-container">
             <button onClick={handleLoginClick} className="login-button">
               <div className="button-content">

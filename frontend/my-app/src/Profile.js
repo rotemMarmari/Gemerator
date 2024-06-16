@@ -1,9 +1,9 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import {
-  getProfile,
+  // getProfile,
   savePlaylist,
-  logout,
-  login,
+  // logout,
+  // login,
   toggleHistory,
   updateStats,
 } from "./api";
@@ -18,24 +18,24 @@ import Recommendation from "./components/Recommendations";
 let recPlaylists;
 
 const Profile = ({ userInfo, userPlaylists, onLogout }) => {
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [playlists, setPlaylists] = useState(userPlaylists);
+  // const [isAuthenticated, setIsAuthenticated] = useState(false);
+  // const [playlists, setPlaylists] = useState(userPlaylists);
   const [recommendedPlaylist, setRecommendedPlaylist] = useState([]);
   const [playlistId, setPlaylistId] = useState(null);
   const [loading, setLoading] = useState(false); 
   const [useHistory, setUseHistory] = useState(false); 
 
-  useEffect(() => {
-    if (isAuthenticated) {
-      getProfile()
-        .then((response) => {
-          setPlaylists(response.data.user_playlists);
-        })
-        .catch((error) => {
-          console.error("Error fetching profile:", error);
-        });
-    }
-  }, [isAuthenticated]);
+  // useEffect(() => {
+  //   if (isAuthenticated) {
+  //     getProfile()
+  //       .then((response) => {
+  //         setPlaylists(response.data.user_playlists);
+  //       })
+  //       .catch((error) => {
+  //         console.error("Error fetching profile:", error);
+  //       });
+  //   }
+  // }, [isAuthenticated]);
 
   const handleSavePlaylist = (playlistId) => {
     setPlaylistId(playlistId);
@@ -53,9 +53,9 @@ const Profile = ({ userInfo, userPlaylists, onLogout }) => {
     updateStats(userInfo.id, "recommend");
   };
 
-  const handleLogin = () => {
-    login().then(() => setIsAuthenticated(true));
-  };
+  // const handleLogin = () => {
+  //   login().then(() => setIsAuthenticated(true));
+  // };
 
   const handleLogout = () => {
     onLogout();
