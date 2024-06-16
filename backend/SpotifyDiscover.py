@@ -361,11 +361,16 @@ def redirect_page():
     
     sp = spotipy.Spotify(auth=token_info['access_token'])
     current_user = sp.current_user()
-    #print(current_user)
+    # Determine the user's profile image
+    if current_user['images']:
+        image_url = current_user['images'][1]['url']
+    else:
+        image_url = None
+
     user_info = {
         'id' : current_user['id'],
         'name': current_user['display_name'],
-        'image': current_user['images'][1]['url']
+        'image': image_url
     }
     user_playlists = sp.current_user_playlists()['items']
     # Fetch user's saved tracks

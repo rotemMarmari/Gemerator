@@ -46,7 +46,7 @@ const Header = ({ userInfo }) => {
       <div className="right-header" ref={rightHeaderRef}>
         {userInfo ? (
           <div className="user-header" onClick={handleUserHeaderClick}>
-            <Avatar alt={userInfo.name} src={userInfo.image} />
+            <Avatar alt={userInfo.name} src={userInfo.image || userIcon} />
             <h2>{userInfo.name}</h2>
             <div className="down-arrow">
               <ArrowDropDownIcon sx={{ color: "#290a50", fontSize: 30 }} />

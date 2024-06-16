@@ -15,8 +15,6 @@ import Checkbox from "@mui/material/Checkbox";
 import Loader from "./components/Loader";
 import Recommendation from "./components/Recommendations";
 
-const PLAYLIST_AMOUNT = 10;
-// let refreshIndex = 0;
 let recPlaylists;
 
 const Profile = ({ userInfo, userPlaylists, onLogout }) => {
@@ -79,7 +77,7 @@ const Profile = ({ userInfo, userPlaylists, onLogout }) => {
         <div className="greeting">
           <h1>Hello, </h1>
           <h2>{userInfo?.name}</h2>
-          <img src={userInfo?.image} />
+          {userInfo?.image && <img src={userInfo.image} alt={userInfo?.name} />}
           <button onClick={handleLogout} className="logout-button">
             Logout
           </button>

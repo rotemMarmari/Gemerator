@@ -1,5 +1,10 @@
 import React, { useState, useEffect } from "react";
-import { BrowserRouter as Router, Route, Routes, Navigate } from 'react-router-dom'; // Correct imports for React Router v6
+import {
+  BrowserRouter as Router,
+  Route,
+  Routes,
+  Navigate,
+} from "react-router-dom"; // Correct imports for React Router v6
 import { getProfile, logout, login, updateStats } from "./api";
 import "./App.css";
 import Home from "./Home";
@@ -23,6 +28,7 @@ const App = () => {
       getProfile()
         .then((response) => {
           setUserInfo(response.data.user_info);
+          console.log(response.data.user_info);
           setPlaylists(response.data.user_playlists);
         })
         .catch((error) => {
@@ -60,18 +66,18 @@ const App = () => {
           <Route
             path="/"
             element={
-                <div>
-                  <Home onLogin={handleLogin} onSongSelect={handleRecommend} />
-                  {recommendedPlaylist.length > 0 && (
-                    <Recommendation
-                      key={recommendationKey}
-                      recommendedPlaylists={recPlaylists}
-                      user_Id={"Guest"}
-                      playlistId={null}
-                      iconType="favorite"
-                    />
-                  )}
-                </div>
+              <div>
+                <Home onLogin={handleLogin} onSongSelect={handleRecommend} />
+                {recommendedPlaylist.length > 0 && (
+                  <Recommendation
+                    key={recommendationKey}
+                    recommendedPlaylists={recPlaylists}
+                    user_Id={"Guest"}
+                    playlistId={null}
+                    iconType="favorite"
+                  />
+                )}
+              </div>
             }
           />
           <Route
