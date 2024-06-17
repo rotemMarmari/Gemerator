@@ -477,6 +477,8 @@ def toggle_history(useHistory):
 
 @app.route('/add_to_gems', methods=['POST'])
 def add_to_gems():
+    global gems
+    global gems_ids
     song = request.get_json()
     song_id = song.get('id')
     if song_id not in gems_ids:
@@ -486,6 +488,8 @@ def add_to_gems():
 
 @app.route('/delete_from_gems/<song_id>', methods=['DELETE'])
 def delete_from_gems(song_id):
+    global gems
+    global gems_ids
     for i, song in enumerate(gems):
         if song['id'] == song_id:
             gems.pop(i)
@@ -496,6 +500,7 @@ def delete_from_gems(song_id):
 
 @app.route('/gems')
 def get_gems():
+    global gems
     return jsonify(gems)
 
 def get_token():
@@ -539,20 +544,24 @@ def search_songs():
 @app.route('/songs', methods=['POST'])
 def add_song():
     song = request.json
-    selected_songs.append(song)
+    selected_songs.append(song)   
     print(selected_songs)
     return jsonify({'status': 'success'})
 
 @app.route('/songs', methods=['GET'])
 def get_songs():
+    global selected_songs
     return jsonify(selected_songs)
 
 @app.route('/songs/<song_id>', methods=['DELETE'])
 def remove_song(song_id):
     global selected_songs
-    selected_songs = [song for song in selected_songs if song['id'] != song_id]
-    print(selected_songs)
-    return jsonify({'status': 'success'})
+    for i, song in enumerate(selected_songs):
+        if song['id'] == song_id:
+            selected_songs.pop(i)
+            # print("Deleted", song_id)
+            break
+    return jsonify({"message": "Song deleted from selected_songs"})
 
 @app.route('/recommend', methods=['POST'])
 def recommend():
