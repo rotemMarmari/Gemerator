@@ -2,7 +2,6 @@ import React from 'react';
 import './App.css';  
 import './SelectedSongs.css'; 
 import RemoveCircleOutlineIcon from '@mui/icons-material/RemoveCircleOutline';
-import Loader from './components/Loader';
 
 const SelectedSongs = ({ selectedSongs, onSongRemove, onRecommend, loading }) => {
   return (

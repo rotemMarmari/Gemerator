@@ -23,11 +23,11 @@ const Recommendation = ({ recommendedPlaylists, user_Id, playlistId, iconType })
       setPlaylists(recommendedPlaylists);
       setCurrentPlaylist(playlists[0]);
     }
-  }, [recommendedPlaylists]);
+  }, [recommendedPlaylists, playlists]);
 
   const handleRefresh = () => {
     refreshIndex = (refreshIndex + 1) % PLAYLIST_AMOUNT;
-    if(refreshIndex == 0)
+    if(refreshIndex === 0)
       refresh_start_over = true;
     setCurrentPlaylist(playlists[refreshIndex]);
     if(!refresh_start_over)
