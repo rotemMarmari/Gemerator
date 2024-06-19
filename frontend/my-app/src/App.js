@@ -25,8 +25,7 @@ const App = () => {
 
   useEffect(() => {
     if (isAuthenticated) {
-      getProfile()
-        .then((response) => {
+      getProfile().then((response) => {
           setUserInfo(response.data.user_info);
           console.log(response.data.user_info);
           setPlaylists(response.data.user_playlists);
@@ -89,9 +88,10 @@ const App = () => {
                   userPlaylists={playlists}
                   onLogout={handleLogout}
                 />
+
               ) : (
                 <Navigate to="/" />
-              )
+              ) 
             }
           />
           <Route path="/gems" element={<Gems />} />

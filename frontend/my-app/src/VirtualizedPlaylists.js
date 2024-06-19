@@ -1,25 +1,13 @@
-  import React, { useState, useEffect } from 'react';
   import Box from '@mui/material/Box';
   import ListItem from '@mui/material/ListItem';
   import ListItemButton from '@mui/material/ListItemButton';
   import ListItemText from '@mui/material/ListItemText';
   import Typography from '@mui/material/Typography';  // Import Typography
   import { FixedSizeList } from 'react-window';
-  import { getProfile } from './api'; 
 
-  const VirtualizedPlaylists = ({ handleSavePlaylist }) => {
-    const [playlists, setPlaylists] = useState([]);
-
-    useEffect(() => {
-      getProfile().then(response => {
-        setPlaylists(response.data.user_playlists);
-      }).catch(error => {
-        console.error('Error fetching playlists:', error);
-      });
-    }, []);
-
+  const VirtualizedPlaylists = ({ handleSavePlaylist, userPlaylists }) => {
     const renderRow = ({ index, style }) => {
-      const playlist = playlists[index];
+      const playlist = userPlaylists[index];
 
       return (
         <ListItem style={style} key={index} component="div" disablePadding>
@@ -40,7 +28,7 @@
         <FixedSizeList
           height={400}
           itemSize={46}
-          itemCount={playlists.length}
+          itemCount={userPlaylists.length}
           overscanCount={5}
         >
           {renderRow}

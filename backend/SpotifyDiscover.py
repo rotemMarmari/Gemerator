@@ -22,7 +22,8 @@ from scipy.spatial.distance import cdist
 
 from dotenv import load_dotenv
 import faiss
-
+import csv
+from datetime import datetime
 
 app = Flask(__name__, static_folder='../frontend/my-app/build', static_url_path='/')
 CORS(app, supports_credentials=True, resources={r"/*": {"origins": "http://localhost:3000"}})
@@ -47,6 +48,7 @@ songs_to_add_to_file = []
 ###############################################################################################
 
 data_path = "data/final_song_dataset.csv"
+csv_file_path = "data/recommendation_stats.csv"
 
 data = pd.read_csv(data_path)
 # data = pd.read_feather(data_path)
@@ -55,6 +57,7 @@ scaler = joblib.load('scaler.joblib')
 
 feature_cols = ['valence', 'year', 'acousticness', 'danceability', 'duration_ms', 'energy',
 'instrumentalness', 'liveness', 'loudness', 'mode', 'speechiness', 'tempo', 'popularity']
+headers = ['user_id', 'total_recommended', 'songs_liked', 'songs_saved', 'total_rating', 'num_ratings', 'last_updated', ]
 
 scaled_data = scaler.transform(data[feature_cols])
 
@@ -387,6 +390,19 @@ def login():
     # print(auth_url)
     return jsonify({"auth_url": auth_url})
 
+@app.route('/logout', methods=['POST'])
+def logout():
+    session.clear()
+    # spotify_oauth = create_spotify_oauth()
+    # cache_handler = spotify_oauth.cache_handler
+    # if cache_handler:
+    #     cache_path = cache_handler.cache_path
+    #     if os.path.exists(cache_path):
+    #         os.remove(cache_path)
+    #         return jsonify({"message": "Logged out successfully and cache cleared"})
+    return jsonify({"message": "Logged out successfully"})
+
+
 @app.route('/profile')
 def redirect_page():
     session.clear()
@@ -408,6 +424,7 @@ def redirect_page():
         'image': image_url
     }
     user_playlists = sp.current_user_playlists()['items']
+    user_playlists = [{"name": playlist["name"], "id": playlist["id"]} for playlist in user_playlists]
     # Fetch user's saved tracks
     # saved_tracks = sp.current_user_saved_tracks()['items']
     saved_tracks_playlist = {
@@ -416,6 +433,26 @@ def redirect_page():
     }
     user_playlists.append(saved_tracks_playlist)
     return jsonify({'user_info': user_info, 'user_playlists': user_playlists})
+
+def get_token():
+    token_info = session.get(TOKEN_INFO, None)
+    if not token_info:
+        return redirect(url_for('login'), external = False)
+    
+    now = int(time.time())
+    
+    is_expired = token_info['expires_at'] - now < 60
+    if is_expired:
+        spotify_oauth = create_spotify_oauth()
+        token_info = spotify_oauth.refresh_access_token(token_info['refresh_token'])
+
+    return token_info
+
+def create_spotify_oauth():
+    return SpotifyOAuth(client_id = CLIENT_ID, client_secret = CLIENT_SECRET,
+                         redirect_uri= url_for('redirect_page', _external = True) ,
+                         scope=SCOPE)
+                           #cache_handler=CacheFileHandler(cache_path=".cache"))
 
 @app.route('/savePlaylist/<playlist_id>')
 def save_playlist(playlist_id):
@@ -465,7 +502,6 @@ def save_playlist(playlist_id):
 
     return jsonify(playlists)
 
-
 @app.route('/add_song_to_playlist/<playlist_id>/<track_id>', methods=['POST'])
 def add_song_to_playlist(playlist_id, track_id):
     try:
@@ -486,18 +522,6 @@ def add_song_to_playlist(playlist_id, track_id):
         return jsonify({"message": message})
     except spotipy.exceptions.SpotifyException as e:
         return jsonify({"error": str(e)})
-
-@app.route('/logout', methods=['POST'])
-def logout():
-    session.clear()
-    spotify_oauth = create_spotify_oauth()
-    cache_handler = spotify_oauth.cache_handler
-    if cache_handler:
-        cache_path = cache_handler.cache_path
-        if os.path.exists(cache_path):
-            os.remove(cache_path)
-            return jsonify({"message": "Logged out successfully and cache cleared"})
-    return jsonify({"message": "Logged out successfully but no cache file found"})
 
 @app.route('/history/<useHistory>', methods=['POST'])
 def toggle_history(useHistory):
@@ -537,26 +561,6 @@ def delete_from_gems(song_id):
 def get_gems():
     global gems
     return jsonify(gems)
-
-def get_token():
-    token_info = session.get(TOKEN_INFO, None)
-    if not token_info:
-        return redirect(url_for('login'), external = False)
-    
-    now = int(time.time())
-    
-    is_expired = token_info['expires_at'] - now < 60
-    if is_expired:
-        spotify_oauth = create_spotify_oauth()
-        token_info = spotify_oauth.refresh_access_token(token_info['refresh_token'])
-
-    return token_info
-
-def create_spotify_oauth():
-    return SpotifyOAuth(client_id = CLIENT_ID, client_secret = CLIENT_SECRET,
-                         redirect_uri= url_for('redirect_page', _external = True) ,
-                         scope=SCOPE)
-                           #cache_handler=CacheFileHandler(cache_path=".cache"))
 
 @app.route('/search', methods=['GET'])
 def search_songs():
@@ -607,12 +611,6 @@ def recommend():
     playlists = create_recommended_playlists(selected_songs, data, scaled_data, scaler, n_songs=210, n_playlists=10)
     
     return jsonify(playlists)
-
-import csv
-from datetime import datetime
-
-csv_file_path = "data/recommendation_stats.csv"
-headers = ['user_id', 'total_recommended', 'songs_liked', 'songs_saved', 'total_rating', 'num_ratings', 'last_updated', ]
 
 @app.route('/update_stats/<user_id>/<action>', methods=['POST'])
 def update_csv(user_id, action, rating=None):

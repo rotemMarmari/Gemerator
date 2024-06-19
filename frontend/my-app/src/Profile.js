@@ -1,9 +1,6 @@
 import React, { useState } from "react";
 import {
-  // getProfile,
   savePlaylist,
-  // logout,
-  // login,
   toggleHistory,
   updateStats,
 } from "./api";
@@ -25,26 +22,14 @@ const Profile = ({ userInfo, userPlaylists, onLogout }) => {
   const [loading, setLoading] = useState(false); 
   const [useHistory, setUseHistory] = useState(false); 
 
-  // useEffect(() => {
-  //   if (isAuthenticated) {
-  //     getProfile()
-  //       .then((response) => {
-  //         setPlaylists(response.data.user_playlists);
-  //       })
-  //       .catch((error) => {
-  //         console.error("Error fetching profile:", error);
-  //       });
-  //   }
-  // }, [isAuthenticated]);
-
   const handleSavePlaylist = (playlistId) => {
     setPlaylistId(playlistId);
-    setLoading(true); // Show the spinner
+    setLoading(true); 
     savePlaylist(playlistId)
       .then((response) => {
         recPlaylists = response.data;
         setRecommendedPlaylist(recPlaylists[0]);
-        setLoading(false); // Hide the spinner
+        setLoading(false);
       })
       .catch((error) => {
         console.error("Error saving playlist:", error);
@@ -52,10 +37,6 @@ const Profile = ({ userInfo, userPlaylists, onLogout }) => {
       });
     updateStats(userInfo.id, "recommend");
   };
-
-  // const handleLogin = () => {
-  //   login().then(() => setIsAuthenticated(true));
-  // };
 
   const handleLogout = () => {
     onLogout();
@@ -95,7 +76,7 @@ const Profile = ({ userInfo, userPlaylists, onLogout }) => {
               label="Use listening history"
             />
           </FormGroup>
-          <VirtualizedPlaylists handleSavePlaylist={handleSavePlaylist} />
+          <VirtualizedPlaylists handleSavePlaylist={handleSavePlaylist} userPlaylists={userPlaylists} />
         </div>
       </div>
       {loading ? (
