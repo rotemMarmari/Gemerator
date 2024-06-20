@@ -206,8 +206,6 @@ def get_song_data(song, spotify_data):
     except IndexError:
         song_data = find_song(song['id'])
         if song_data is not None:
-            # print(song_data['artists'])
-            # add_song_to_dataset(song_data)
             songs_to_add_to_file.append(song_data[data.columns])
             # song_data = song_data.iloc[0]
             return song_data
@@ -424,8 +422,7 @@ def redirect_page():
     }
     user_playlists = sp.current_user_playlists()['items']
     user_playlists = [{"name": playlist["name"], "id": playlist["id"]} for playlist in user_playlists]
-    # Fetch user's saved tracks
-    # saved_tracks = sp.current_user_saved_tracks()['items']
+
     saved_tracks_playlist = {
         'name': 'Liked Songs',
         'id': 'saved_tracks'
@@ -451,7 +448,6 @@ def create_spotify_oauth():
     return SpotifyOAuth(client_id = CLIENT_ID, client_secret = CLIENT_SECRET,
                          redirect_uri= url_for('redirect_page', _external = True) ,
                          scope=SCOPE)
-                           #cache_handler=CacheFileHandler(cache_path=".cache"))
 
 @app.route('/savePlaylist/<playlist_id>')
 def save_playlist(playlist_id):
@@ -552,7 +548,6 @@ def delete_from_gems(song_id):
         if song['id'] == song_id:
             gems.pop(i)
             gems_ids.remove(song_id)
-            # print("Deleted", song_id)
             break
     return jsonify({"message": "Song deleted from gems"})
 
@@ -597,7 +592,6 @@ def remove_song(song_id):
     for i, song in enumerate(selected_songs):
         if song['id'] == song_id:
             selected_songs.pop(i)
-            # print("Deleted", song_id)
             break
     return jsonify({"message": "Song deleted from selected_songs"})
 
