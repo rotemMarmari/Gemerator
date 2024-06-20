@@ -4,7 +4,7 @@
 
 Gemerator is a music recommendation website built using Flask and React, designed to enhance your listening experience. If you have a Spotify account, you can choose any of your playlists to get personalized song recommendations. For non-Spotify users, you can create custom playlists and receive tailored song suggestions based on those. Whether you're a Spotify user or not, Gemerator is here to help you discover new music you'll love.
 
-![image](https://github.com/rotemMarmari/Gemerator/assets/127433228/47503d74-3b6d-4b78-bc19-85e38131673f)
+![Picture1](https://github.com/rotemMarmari/Gemerator/assets/127433228/5bef55dd-58b4-4972-97d0-2cd5a37c196b)
 
 ## Features
 
