@@ -402,7 +402,6 @@ def logout():
     #         return jsonify({"message": "Logged out successfully and cache cleared"})
     return jsonify({"message": "Logged out successfully"})
 
-
 @app.route('/profile')
 def redirect_page():
     session.clear()
