@@ -21,7 +21,9 @@ from collections import defaultdict
 from scipy.spatial.distance import cdist
 
 from dotenv import load_dotenv
-
+import faiss
+import csv
+from datetime import datetime
 
 app = Flask(__name__, static_folder='../frontend/my-app/build', static_url_path='/')
 CORS(app, supports_credentials=True, resources={r"/*": {"origins": "http://localhost:3000"}})
@@ -42,9 +44,11 @@ history_list = []
 selected_songs = []
 gems = []
 gems_ids = []
+songs_to_add_to_file = []
 ###############################################################################################
 
 data_path = "data/final_song_dataset.csv"
+csv_file_path = "data/recommendation_stats.csv"
 
 data = pd.read_csv(data_path)
 # data = pd.read_feather(data_path)
@@ -53,16 +57,32 @@ scaler = joblib.load('scaler.joblib')
 
 feature_cols = ['valence', 'year', 'acousticness', 'danceability', 'duration_ms', 'energy',
 'instrumentalness', 'liveness', 'loudness', 'mode', 'speechiness', 'tempo', 'popularity']
+headers = ['user_id', 'total_recommended', 'songs_liked', 'songs_saved', 'total_rating', 'num_ratings', 'last_updated', ]
 
 scaled_data = scaler.transform(data[feature_cols])
 
+# Initialize FAISS index
+d = scaled_data.shape[1]  # dimension
+index = faiss.IndexFlatIP(d)  # using Inner Product (cosine similarity)
+
+# Add the scaled data to the FAISS index
+index.add(scaled_data.astype(np.float32))
+
 sp = spotipy.Spotify(auth_manager=SpotifyClientCredentials(client_id=CLIENT_ID, client_secret=CLIENT_SECRET))
 
-def add_row_to_data(song_df):
-    global data
+def add_rows_to_data():
+    global data_path
+    global songs_to_add_to_file
+    
     # data.to_feather(data_path)
-    song_df.to_csv(data_path, mode='a', header=False, index=False) 
+    # song_df.to_csv(data_path, mode='a', header=False, index=False) 
     # print(song_df['id'], "added to data")
+
+    # Concatenate the list of DataFrames into a single DataFrame
+    combined_df = pd.concat(songs_to_add_to_file, ignore_index=True)
+    # Append the combined DataFrame to the CSV
+    combined_df.to_csv(data_path, mode='a', header=False, index=False)
+    # print(combined_df['id'], "added to data")
     pass
 
 def update_data():
@@ -91,18 +111,31 @@ def update_data():
 #     # data_save_thread = threading.Thread(target=add_row_to_data, args=(song_df,))
 #     # data_save_thread.start()
 
-def add_song_to_dataset(song_df):
+def add_songs_to_dataset():
     global data
     global scaled_data
+    global songs_to_add_to_file
+
     # Append the new song data to the in-memory dataset
-    data = pd.concat([data, song_df], ignore_index=True)
+    data = pd.concat([data] + songs_to_add_to_file, ignore_index=True)
+
     # Update the scaled data
     scaled_data = scaler.transform(data[feature_cols]) 
+    
+    # Initialize FAISS index
+    d = scaled_data.shape[1]  # dimension
+    index = faiss.IndexFlatIP(d)  # using Inner Product (cosine similarity)
+
+    # Add the scaled data to the FAISS index
+    index.add(scaled_data.astype(np.float32))
 
     # Append the new song data to the dataset csv file
-    song_df = song_df[data.columns] # rearrange the columns to fit the csv
-    data_save_thread = threading.Thread(target=add_row_to_data, args=(song_df,))
-    data_save_thread.start()
+    # data_save_thread = threading.Thread(target=add_rows_to_data, args=())
+    # data_save_thread.start()
+    add_rows_to_data()
+    print("added", len(songs_to_add_to_file), "new songs to data.")
+    songs_to_add_to_file = []
+    pass
 
 def find_song(track_id):
     song_data = defaultdict()
@@ -164,6 +197,7 @@ def get_preview_and_album_cover(playlist, data):
                 data.loc[data['id'] == song_info['id'], 'preview_url'] = preview_url
 
 def get_song_data(song, spotify_data):
+    global songs_to_add_to_file
     # try to find the song in the dataset
     try:
         song_data = spotify_data[(spotify_data['id'] == song['id'])].iloc[0]
@@ -173,7 +207,8 @@ def get_song_data(song, spotify_data):
         song_data = find_song(song['id'])
         if song_data is not None:
             # print(song_data['artists'])
-            add_song_to_dataset(song_data)
+            # add_song_to_dataset(song_data)
+            songs_to_add_to_file.append(song_data[data.columns])
             # song_data = song_data.iloc[0]
             return song_data
         else:
@@ -252,6 +287,11 @@ def recommend_songs(song_list, spotify_data, scaled_data, scaler, n_songs=10):
     rec_songs_df = pd.DataFrame(unique_rec_songs)   
     rec_songs_df = rec_songs_df.head(n_songs)
     
+    if songs_to_add_to_file:
+        # update the data with the new songs
+        data_save_thread = threading.Thread(target=add_songs_to_dataset, args=())
+        data_save_thread.start()
+
     # Return recommended songs metadata
     metadata_cols = ['name', 'year', 'artists', 'id', 'preview_url', 'album_cover_url']
     return rec_songs_df[metadata_cols].to_dict(orient='records')
@@ -260,19 +300,11 @@ def recommend_songs(song_list, spotify_data, scaled_data, scaler, n_songs=10):
 FAISS, which stands for Facebook AI Similarity Search, is a library developed by Facebook AI that enables efficient similarity search.
 It's designed to handle large scale datasets and is particularly useful for tasks like recommendation systems.
 '''
-import faiss
 
-def recommend_songs_faiss(song_list, spotify_data, scaled_data, scaler, n_songs=10):
+def recommend_songs_faiss(song_list, spotify_data, scaled_data, scaler, index, n_songs=10):
     song_dict = flatten_dict_list(song_list)  
     song_center = get_mean_vector(song_list, spotify_data) 
     scaled_song_center = scaler.transform(song_center.reshape(1,-1))
-    
-    # Initialize FAISS index
-    d = scaled_data.shape[1]  # dimension
-    index = faiss.IndexFlatIP(d)  # using Inner Product (cosine similarity)
-    
-    # Add the scaled data to the FAISS index
-    index.add(scaled_data.astype(np.float32))
     
     # Search the nearest neighbors
     k = n_songs * 10  # number of nearest neighbors to retrieve
@@ -306,13 +338,19 @@ def recommend_songs_faiss(song_list, spotify_data, scaled_data, scaler, n_songs=
     rec_songs_df = pd.DataFrame(unique_rec_songs)   
     rec_songs_df = rec_songs_df.head(n_songs)
     
+    if songs_to_add_to_file:
+        # update the data with the new songs
+        data_save_thread = threading.Thread(target=add_songs_to_dataset, args=())
+        data_save_thread.start()
+
     # Return recommended songs metadata
     metadata_cols = ['name', 'year', 'artists', 'id', 'preview_url', 'album_cover_url']
     return rec_songs_df[metadata_cols].to_dict(orient='records')
 
 def create_recommended_playlists(song_list, data, scaled_data, scaler, n_songs, n_playlists):
-    playlist = recommend_songs(song_list, data, scaled_data, scaler, n_songs=n_songs)    
-    # playlist = recommend_songs_faiss(song_list, data, scaled_data, scaler, n_songs=n_songs)   
+    global index
+    # playlist = recommend_songs(song_list, data, scaled_data, scaler, n_songs=n_songs)    
+    playlist = recommend_songs_faiss(song_list, data, scaled_data, scaler, index, n_songs=n_songs)   
     random.shuffle(playlist)
     
     songs_per_playlist = n_songs // n_playlists    
@@ -324,8 +362,8 @@ def create_recommended_playlists(song_list, data, scaled_data, scaler, n_songs, 
     for pl in playlists:
         get_preview_and_album_cover(pl, data)
 
-    data_save_thread = threading.Thread(target=update_data)
-    data_save_thread.start()
+    # data_save_thread = threading.Thread(target=update_data)
+    # data_save_thread.start()
 
     return playlists
 
@@ -352,6 +390,19 @@ def login():
     # print(auth_url)
     return jsonify({"auth_url": auth_url})
 
+@app.route('/logout', methods=['POST'])
+def logout():
+    session.clear()
+    # spotify_oauth = create_spotify_oauth()
+    # cache_handler = spotify_oauth.cache_handler
+    # if cache_handler:
+    #     cache_path = cache_handler.cache_path
+    #     if os.path.exists(cache_path):
+    #         os.remove(cache_path)
+    #         return jsonify({"message": "Logged out successfully and cache cleared"})
+    return jsonify({"message": "Logged out successfully"})
+
+
 @app.route('/profile')
 def redirect_page():
     session.clear()
@@ -373,6 +424,7 @@ def redirect_page():
         'image': image_url
     }
     user_playlists = sp.current_user_playlists()['items']
+    user_playlists = [{"name": playlist["name"], "id": playlist["id"]} for playlist in user_playlists]
     # Fetch user's saved tracks
     # saved_tracks = sp.current_user_saved_tracks()['items']
     saved_tracks_playlist = {
@@ -381,6 +433,26 @@ def redirect_page():
     }
     user_playlists.append(saved_tracks_playlist)
     return jsonify({'user_info': user_info, 'user_playlists': user_playlists})
+
+def get_token():
+    token_info = session.get(TOKEN_INFO, None)
+    if not token_info:
+        return redirect(url_for('login'), external = False)
+    
+    now = int(time.time())
+    
+    is_expired = token_info['expires_at'] - now < 60
+    if is_expired:
+        spotify_oauth = create_spotify_oauth()
+        token_info = spotify_oauth.refresh_access_token(token_info['refresh_token'])
+
+    return token_info
+
+def create_spotify_oauth():
+    return SpotifyOAuth(client_id = CLIENT_ID, client_secret = CLIENT_SECRET,
+                         redirect_uri= url_for('redirect_page', _external = True) ,
+                         scope=SCOPE)
+                           #cache_handler=CacheFileHandler(cache_path=".cache"))
 
 @app.route('/savePlaylist/<playlist_id>')
 def save_playlist(playlist_id):
@@ -430,7 +502,6 @@ def save_playlist(playlist_id):
 
     return jsonify(playlists)
 
-
 @app.route('/add_song_to_playlist/<playlist_id>/<track_id>', methods=['POST'])
 def add_song_to_playlist(playlist_id, track_id):
     try:
@@ -451,18 +522,6 @@ def add_song_to_playlist(playlist_id, track_id):
         return jsonify({"message": message})
     except spotipy.exceptions.SpotifyException as e:
         return jsonify({"error": str(e)})
-
-@app.route('/logout', methods=['POST'])
-def logout():
-    session.clear()
-    spotify_oauth = create_spotify_oauth()
-    cache_handler = spotify_oauth.cache_handler
-    if cache_handler:
-        cache_path = cache_handler.cache_path
-        if os.path.exists(cache_path):
-            os.remove(cache_path)
-            return jsonify({"message": "Logged out successfully and cache cleared"})
-    return jsonify({"message": "Logged out successfully but no cache file found"})
 
 @app.route('/history/<useHistory>', methods=['POST'])
 def toggle_history(useHistory):
@@ -502,26 +561,6 @@ def delete_from_gems(song_id):
 def get_gems():
     global gems
     return jsonify(gems)
-
-def get_token():
-    token_info = session.get(TOKEN_INFO, None)
-    if not token_info:
-        return redirect(url_for('login'), external = False)
-    
-    now = int(time.time())
-    
-    is_expired = token_info['expires_at'] - now < 60
-    if is_expired:
-        spotify_oauth = create_spotify_oauth()
-        token_info = spotify_oauth.refresh_access_token(token_info['refresh_token'])
-
-    return token_info
-
-def create_spotify_oauth():
-    return SpotifyOAuth(client_id = CLIENT_ID, client_secret = CLIENT_SECRET,
-                         redirect_uri= url_for('redirect_page', _external = True) ,
-                         scope=SCOPE)
-                           #cache_handler=CacheFileHandler(cache_path=".cache"))
 
 @app.route('/search', methods=['GET'])
 def search_songs():
@@ -572,12 +611,6 @@ def recommend():
     playlists = create_recommended_playlists(selected_songs, data, scaled_data, scaler, n_songs=210, n_playlists=10)
     
     return jsonify(playlists)
-
-import csv
-from datetime import datetime
-
-csv_file_path = "data/recommendation_stats.csv"
-headers = ['user_id', 'total_recommended', 'songs_liked', 'songs_saved', 'total_rating', 'num_ratings', 'last_updated', ]
 
 @app.route('/update_stats/<user_id>/<action>', methods=['POST'])
 def update_csv(user_id, action, rating=None):

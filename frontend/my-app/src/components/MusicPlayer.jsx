@@ -149,9 +149,10 @@ const MusicPlayer = ({ user_id, song, playlistId, iconType, onSongDelete }) => {
   const lightIconColor =
     theme.palette.mode === "dark" ? "rgba(255,255,255,0.4)" : "rgba(0,0,0,0.4)";
 
-  const artistNames = Array.isArray(song.artists)
-    ? song.artists.join(", ").replace(/[\[\]']/g, "")
-    : song.artists.replace(/[\[\]']/g, "");
+    const artistNames = Array.isArray(song.artists)
+    ? song.artists.join(", ").replace(/[\\[\]']/g, "")
+    : song.artists.replace(/[\\[\]']/g, "");
+
 
   return (
     <Box sx={{ width: "100%", overflow: "hidden" }}>
