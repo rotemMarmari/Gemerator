@@ -37,7 +37,7 @@ TOKEN_INFO    = 'token_info'
 CLIENT_ID     = os.getenv('CLIENT_ID')
 CLIENT_SECRET = os.getenv('CLIENT_SECRET')
 REDIRECT_URI  = 'http://localhost:5000'
-SCOPE         = 'user-read-recently-played user-library-read playlist-modify-public playlist-modify-private playlist-read-private'
+SCOPE         = 'user-read-recently-played user-library-read user-library-modify playlist-modify-public playlist-modify-private playlist-read-private'
 
 use_history = False
 history_list = []
