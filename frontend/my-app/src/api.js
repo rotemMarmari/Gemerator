@@ -2,7 +2,7 @@ import axios from "axios";
 
 const api = axios.create({
   baseURL: "http://localhost:5000",
-  withCredentials: true, // This is important for session management
+  withCredentials: true, 
 });
 
 export const home = () => api.post(`/`);
@@ -14,7 +14,6 @@ export const logout = () => api.post("/logout");
 export const addToPlaylist = (playlistId, trackId) =>
   api.post(`/add_song_to_playlist/${playlistId}/${trackId}`);
 export const toggleHistory = (useHistory) => api.post(`/history/${useHistory}`);
-// export const updateStats = (user_id, action) => api.post(`/update_stats/${user_id}/${action}`);
 export const updateStats = (user_id, action, rating = null) => {
   const params = new URLSearchParams();
   if (rating !== null) {

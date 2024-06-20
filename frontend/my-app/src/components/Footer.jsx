@@ -21,10 +21,6 @@ const Footer = () => {
             <EmailIcon className="contact-icon" /> 
             <a href="mailto:rmarmari6@gmail.com"> rmarmari6@gmail.com</a>
           </p>
-          {/* <p>
-            <ContactPhoneIcon className="contact-icon" /> 
-            <a href="tel:+15551234567">  +1 (555) 123-4567</a>
-          </p> */}
         </div>
 
         <div className="footer-section follow-us">

@@ -28,7 +28,6 @@ const Header = ({ userInfo }) => {
 
   const navigateHome = () => {
     navigate("/");
-    // window.location.reload();
   }
 
   const open = Boolean(anchorEl);

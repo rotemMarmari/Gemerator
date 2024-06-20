@@ -15,8 +15,6 @@ import Recommendation from "./components/Recommendations";
 let recPlaylists;
 
 const Profile = ({ userInfo, userPlaylists, onLogout }) => {
-  // const [isAuthenticated, setIsAuthenticated] = useState(false);
-  // const [playlists, setPlaylists] = useState(userPlaylists);
   const [recommendedPlaylist, setRecommendedPlaylist] = useState([]);
   const [playlistId, setPlaylistId] = useState(null);
   const [loading, setLoading] = useState(false); 

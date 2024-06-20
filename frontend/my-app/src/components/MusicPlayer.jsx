@@ -109,7 +109,6 @@ const MusicPlayer = ({ user_id, song, playlistId, iconType, onSongDelete }) => {
     setIsHeartPressed((prevState) => !prevState);
     updateStats(user_id, isHeartPressed ? "dislike" : "like");
     if (!isHeartPressed) {
-      // addSongToGems(song.id);
       addSongToGems(song);
     } else {
       deleteFromGems(song.id);
@@ -119,7 +118,7 @@ const MusicPlayer = ({ user_id, song, playlistId, iconType, onSongDelete }) => {
   const handleDeleteClick = async () => {
     try {
       await deleteFromGems(song.id);
-      onSongDelete(song.id); // Call the passed function to update the state in Gems component
+      onSongDelete(song.id);
     } catch (error) {
       console.error("Error deleting song:", error);
     }

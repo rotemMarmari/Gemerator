@@ -18,7 +18,6 @@ const SearchBar = ({ onSongSelect }) => {
 
     if (value.length > 2) {
       try {
-        // const response = await axios.get(`http://localhost:5000/search?q=${value}`);
         const response = await searchSongs(value);
         setSuggestions(response.data);
       } catch (error) {
@@ -65,7 +64,6 @@ const SearchBar = ({ onSongSelect }) => {
     setSelectedSongs(selectedSongs.filter((song) => song.id !== songId));
 
     try {
-      // await axios.delete(`http://localhost:5000/songs/${songId}`);
       await removeSong(songId);
     } catch (error) {
       console.error("Error removing song:", error);
@@ -75,7 +73,6 @@ const SearchBar = ({ onSongSelect }) => {
   const handleRecommend = async () => {
     setLoading(true); // Show the spinner
     try {
-      // const response = await axios.post('http://localhost:5000/recommend');
       const response = await recommendSongs();
       onSongSelect(response.data);
     } catch (error) {
@@ -112,8 +109,6 @@ const SearchBar = ({ onSongSelect }) => {
       <SelectedSongs
         selectedSongs={selectedSongs}
         onSongRemove={handleSongRemove}
-        // onRecommend={handleRecommend}
-        // loading={loading}
       />
       <button onClick={handleRecommend} className="btn">
         Generate playlists

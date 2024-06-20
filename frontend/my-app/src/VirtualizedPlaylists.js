@@ -2,7 +2,7 @@
   import ListItem from '@mui/material/ListItem';
   import ListItemButton from '@mui/material/ListItemButton';
   import ListItemText from '@mui/material/ListItemText';
-  import Typography from '@mui/material/Typography';  // Import Typography
+  import Typography from '@mui/material/Typography';  
   import { FixedSizeList } from 'react-window';
 
   const VirtualizedPlaylists = ({ handleSavePlaylist, userPlaylists }) => {

@@ -4,7 +4,7 @@ import {
   Route,
   Routes,
   Navigate,
-} from "react-router-dom"; // Correct imports for React Router v6
+} from "react-router-dom"; 
 import { getProfile, logout, login, updateStats } from "./api";
 import "./App.css";
 import Home from "./Home";
@@ -51,7 +51,7 @@ const App = () => {
 
   const handleRecommend = (recommendedPlaylists) => {
     recPlaylists = null;
-    setRecommendationKey((prevKey) => prevKey + 1); // Update the key to remount the component
+    setRecommendationKey((prevKey) => prevKey + 1);
     recPlaylists = recommendedPlaylists;
     setRecommendedPlaylist(recPlaylists[0]);
     updateStats("Guest", "recommend");

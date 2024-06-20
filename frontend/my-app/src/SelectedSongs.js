@@ -17,13 +17,7 @@ const SelectedSongs = ({ selectedSongs, onSongRemove, onRecommend, loading }) =>
             />
           </li>
         ))}
-      </ul>
-      {/* <button onClick={onRecommend} className="btn">Generate playlists</button>
-      {loading && (
-        <div className="spinner-container">
-          <Loader />
-        </div>
-      )} */}
+      </ul>   
     </div>
   );
 };
