@@ -66,7 +66,7 @@ const App = () => {
             path="/"
             element={
               <div>
-                <Home onLogin={handleLogin} onSongSelect={handleRecommend} />
+                <Home onLogin={handleLogin} onRecommend={handleRecommend} />
                 {recommendedPlaylist.length > 0 && (
                   <Recommendation
                     key={recommendationKey}

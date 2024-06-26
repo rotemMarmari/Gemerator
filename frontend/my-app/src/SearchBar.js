@@ -6,7 +6,7 @@ import SelectedSongs from "./SelectedSongs";
 import "./SearchBar.css";
 import Loader from "./components/Loader";
 
-const SearchBar = ({ onSongSelect }) => {
+const SearchBar = ({ onRecommend }) => {
   const [query, setQuery] = useState("");
   const [suggestions, setSuggestions] = useState([]);
   const [selectedSongs, setSelectedSongs] = useState([]);
@@ -35,7 +35,8 @@ const SearchBar = ({ onSongSelect }) => {
     );
     if (!songExists) {
       // Add the song to the list if it doesn't exist
-      setSelectedSongs([...selectedSongs, song]);
+      selectedSongs.push(song);
+      setSelectedSongs(selectedSongs);
       setQuery("");
       setSuggestions([]);
 
@@ -74,7 +75,7 @@ const SearchBar = ({ onSongSelect }) => {
     setLoading(true); // Show the spinner
     try {
       const response = await recommendSongs();
-      onSongSelect(response.data);
+      onRecommend(response.data);
     } catch (error) {
       console.error("Error recommending songs:", error);
     } finally {

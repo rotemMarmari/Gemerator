@@ -347,8 +347,8 @@ def recommend_songs_faiss(song_list, spotify_data, scaled_data, scaler, index, n
 
 def create_recommended_playlists(song_list, data, scaled_data, scaler, n_songs, n_playlists):
     global index
-    # playlist = recommend_songs(song_list, data, scaled_data, scaler, n_songs=n_songs)    
-    playlist = recommend_songs_faiss(song_list, data, scaled_data, scaler, index, n_songs=n_songs)   
+    playlist = recommend_songs(song_list, data, scaled_data, scaler, n_songs=n_songs)    
+    # playlist = recommend_songs_faiss(song_list, data, scaled_data, scaler, index, n_songs=n_songs)   
     random.shuffle(playlist)
     
     songs_per_playlist = n_songs // n_playlists    
@@ -507,8 +507,8 @@ def add_song_to_playlist(playlist_id, track_id):
         else:
             # Check if the playlist is a special Spotify-generated playlist
             playlist = sp.playlist(playlist_id)
-            if playlist['owner']['id'] == 'spotify':
-                return jsonify({"error": "Cannot add tracks to Spotify-generated playlists"})
+            if playlist['owner']['id'] != sp.current_user()['id']:
+                return jsonify({"error": "Cannot add tracks to playlists not owned by you"})
             
             # Regular playlist
             sp.playlist_add_items(playlist_id, [track_id])

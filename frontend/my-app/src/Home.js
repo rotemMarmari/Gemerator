@@ -5,7 +5,7 @@ import './home.css';
 import spotifyLogo from './assets/spotify-logo-fill-svgrepo-com.svg';
 import { home } from './api'
 
-const Home = ({ onLogin, onSongSelect}) => {
+const Home = ({ onLogin, onRecommend}) => {
   const navigate = useNavigate();
   
   useEffect(() => {
@@ -44,7 +44,7 @@ const Home = ({ onLogin, onSongSelect}) => {
         <div className="search-song-container">
           <h3>Start here by searching for your favorite songs!</h3>
           <div className="search-bar">
-            <SearchBar onSongSelect={onSongSelect} />
+            <SearchBar onRecommend={onRecommend} />
           </div>
         </div>
       </div>

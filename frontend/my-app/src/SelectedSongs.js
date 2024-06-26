@@ -3,7 +3,7 @@ import './App.css';
 import './SelectedSongs.css'; 
 import RemoveCircleOutlineIcon from '@mui/icons-material/RemoveCircleOutline';
 
-const SelectedSongs = ({ selectedSongs, onSongRemove, onRecommend, loading }) => {
+const SelectedSongs = ({ selectedSongs, onSongRemove }) => {
   return (
     <div className="selected-songs-container">
       <h3>Selected Songs</h3>
