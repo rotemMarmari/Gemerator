@@ -11,11 +11,11 @@ Gemerator is a music recommendation website built using Flask and React, designe
 - **Description**: The homepage allows users to navigate, check their login status (Guest or Spotify User), and create playlists by searching for songs using the Spotify API.
 
 ### Profile
-![Profile](https://github.com/user-attachments/assets/32c4794b-1a2d-4030-b08a-e935fb87db39)
+![image](https://github.com/user-attachments/assets/04fbf42c-61c9-4e85-8d15-ace1abdc3d17)
 - **Description**: The profile page displays the user's Spotify playlists and allows them to toggle whether to include their listening history in recommendations.
 
 ### Recommendation Section
-![Recommendation Section](https://github.com/user-attachments/assets/f2b38941-81d3-47cb-a4cc-b035d498e176)
+![image](https://github.com/user-attachments/assets/84933c6b-99dd-4ec3-9290-f69a9eeead81)
 - **Description**: This section shows the recommended playlists based on user interaction, with options to rate the suggestions and manage song previews.
 
 ### "My Gems"
